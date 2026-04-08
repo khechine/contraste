@@ -1,0 +1,5 @@
+admin-mobile/
+.next/
+node_modules/
+*.log
+.git/
