@@ -2,7 +2,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json tsconfig.json next.config.ts tailwind.config.ts postcss.config.mjs ./
+COPY package.json package-lock.json tsconfig.json next.config.ts postcss.config.mjs ./
 COPY src ./src
 COPY public ./public
 
