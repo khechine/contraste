@@ -1,0 +1,1198 @@
+{
+  "authors": [
+    {
+      "name": "Nelly Amri",
+      "bio_fr": "Nelly AMRI est historienne et Professeure des Universités ; elle a longtemps enseigné à la Faculté des Lettres, des Arts et des Humanités (Université de La Manouba –Tunis). Elle est spécialiste de l'histoire du soufisme, de l'hagiographie et de la sainteté en Islam.",
+      "bio_en": "Nelly AMRI is a historian and University Professor; she taught at the Faculty of Letters, Arts and Humanities (University of La Manouba - Tunis). She specializes in the history of Sufism, hagiography and sanctity in Islam.",
+      "bio_ar": "نللي عمري مؤرخة وأستاذة جامعية؛ درّست في كلية الآداب والفنون والإنسانية. هي متخصصة في تاريخ التصوف والسيرة والقداسة في الإسلام.",
+      "photo": "/images/seed/photo-Nelly-AMRI.jpg"
+    },
+    {
+      "name": "Samir Makhlouf",
+      "bio_fr": "Samir Makhlouf est un artiste multi-facette, écrivain, peintre, poète et romancier tunisien. Son roman 'Merminus Infinitif' a remporté le Prix Comar d'Or 2020.",
+      "bio_en": "Samir Makhlouf is a multifaceted Tunisian artist, writer, painter, poet and novelist. His novel 'Merminus Infinitif' won the Comar d'Or 2020 prize.",
+      "bio_ar": "سمير مخلوف فنان متعدد الأوجه، كاتب، رسام، شاعر وروائي تونسي. فازت روايته 'ميرمينوس إنفينيتيف' بجائزة الكومار الذهبي 2020.",
+      "photo": "/images/seed/a8442fd7c4995f26ed5869bfa99667c133c14379.jpeg"
+    },
+    {
+      "name": "Samir Aounallah",
+      "bio_fr": "Samir Aounallah est un historien et archéologue tunisien spécialisé dans l'étude de Carthage et du patrimoine archéologique tunisien.",
+      "bio_en": "Samir Aounallah is a Tunisian historian and archaeologist specializing in the study of Carthage and Tunisian archaeological heritage.",
+      "bio_ar": "سمير عون الله مؤرخ وأثري تونسي متخصص في دراسة قرطاج والتراث الأثري التونسي.",
+      "photo": "/images/seed/profile_photo.jpg"
+    },
+    {
+      "name": "Abdellatif Mrabet",
+      "bio_fr": "Abdellatif Mrabet est un écrivain tunisien. Son roman 'Le vert et le bleu' a remporté le Prix Spécial du Jury lors du Comar d'Or 2025.",
+      "bio_en": "Abdellatif Mrabet is a Tunisian writer. His novel 'Le vert et le bleu' won the Special Jury Prize at the Comar d'Or 2025.",
+      "bio_ar": "عبد اللطيف mrabet كاتب تونسي. فازت روايته 'الأخضر والأزرق' بالجائزة الخاصة للجنة التحكيم في الكومار الذهبي 2025.",
+      "photo": "/images/seed/Abdelatif-Mrabet.jpg"
+    },
+    {
+      "name": "Ali Louati",
+      "bio_fr": "Ali Louati est uncrivain et poète tunisien qui explore les thèmes de l'amour, de la spiritualité et de l'identité dans ses œuvres.",
+      "bio_en": "Ali Louati is a Tunisian writer and poet who explores themes of love, spirituality and identity in his works.",
+      "bio_ar": "علي اللواتي كاتب وشاعر تونسي يستكشف موضوعات الحب والروحانية والهوية في أعماله.",
+      "photo": "/images/seed/ali-louati.png"
+    },
+    {
+      "name": "Hassen El Annabi",
+      "bio_fr": "Hassen El Annabi est un historien et spécialiste du patrimoine tunisien.",
+      "bio_en": "Hassen El Annabi is a historian and specialist in Tunisian heritage.",
+      "bio_ar": "حسن العليbeidi historian and specialist in Tunisian heritage.",
+      "photo": "/images/seed/7_media_object_file_106849.jpg"
+    },
+    {
+      "name": "Abdelmajid Ennabli",
+      "bio_fr": "Abdelmajid Ennabli est un historien tunisien spécialisé dans l'archéologie et le patrimoine de la Tunisie antique.",
+      "bio_en": "Abdelmajid Ennabli is a Tunisian historian specializing in the archaeology and heritage of ancient Tunisia.",
+      "bio_ar": "عبد المجيد النnabli مؤرخ تونسي متخصص في آثار وتراث تونس القديمة.",
+      "photo": "/images/seed/a8c939587c0662e74fc5f253533e8e26.png"
+    },
+    {
+      "name": "Mohamed Ghozzi",
+      "bio_fr": "Mohamed Ghozzi est un poète tunisien. Son recueil de poésie a remporté le Prix du recueil de poésie au Prix Abdelwaheb Ben Ayed de littérature 2022.",
+      "bio_en": "Mohamed Ghozzi is a Tunisian poet. His poetry collection won the Poetry Collection Prize at the Abdelwaheb Ben Ayed Literature Prize 2022.",
+      "bio_ar": "محمد الغزي شاعر تونسي. فاز ديوانه بجائزة ديوان الشعر في جائزة عبد الوهاب بن عيادة للأدب 2022.",
+      "photo": null
+    },
+    {
+      "name": "Hichem Ben Ammar",
+      "bio_fr": "Hichem Ben Ammar est un poète tunisien.",
+      "bio_en": "Hichem Ben Ammar is a Tunisian poet.",
+      "bio_ar": "هشام بن عمّار شاعر تونسي.",
+      "photo": "/images/seed/Hichem-Ben-Ammar.jpeg"
+    },
+    {
+      "name": "Mouayed El Mnari",
+      "bio_fr": "Mouayed El Mnari est un spécialiste du soufisme et de la spiritualité islamique.",
+      "bio_en": "Mouayed El Mnari is a specialist in Sufism and Islamic spirituality.",
+      "bio_ar": "معاذ المناري متخصص في التصوف والروحانية الإسلامية.",
+      "photo": null
+    },
+    {
+      "name": "Mona Belhaj",
+      "bio_fr": "Mona Belhaj est une écrivaine tunisienne.",
+      "bio_en": "Mona Belhaj is a Tunisian writer.",
+      "bio_ar": "منى بلhaj كاتبة تونسية.",
+      "photo": "/images/seed/2_40.jpg"
+    },
+    {
+      "name": "Dora Latiri",
+      "bio_fr": "Dora Latiri est une écrivaine et poète tunisienne.",
+      "bio_en": "Dora Latiri is a Tunisian writer and poet.",
+      "bio_ar": "دورا latiri كاتبة وشاعرة تونسية.",
+      "photo": null
+    },
+    {
+      "name": "Collectif d'auteurs",
+      "bio_fr": "Un collectif d'auteurs et chercheurs.",
+      "bio_en": "A collective of authors and researchers.",
+      "bio_ar": "تجمع من الكتّاب والباحثين.",
+      "photo": null
+    },
+    {
+      "name": "Michel Pieffer",
+      "bio_fr": "Michel Pieffer est un auteur français.",
+      "bio_en": "Michel Pieffer is a French author.",
+      "bio_ar": "ميشال بييفييه مؤلف فرنسي.",
+      "photo": null
+    },
+    {
+      "name": "Lassaad Ben Abdallah",
+      "bio_fr": "Lassaad Ben Abdallah est un auteur et dramaturge tunisien.",
+      "bio_en": "Lassaad Ben Abdallah is a Tunisian author and playwright.",
+      "bio_ar": "لصر间隔دي بن عبد الله مؤلف ومسرحي تونسي.",
+      "photo": "/images/seed/lassad-benn-abdallah.jpeg"
+    },
+    {
+      "name": "Neji Djelloul",
+      "bio_fr": "Neji Djelloul est un historien et spécialiste du patrimoine archéologique tunisien.",
+      "bio_en": "Neji Djelloul is a historian and specialist in Tunisian archaeological heritage.",
+      "bio_ar": "نجيب جلولي مؤرخ ومتخصص في التراث الأثري التونسي.",
+      "photo": "/images/seed/NejiPro.jpg"
+    },
+    {
+      "name": "Slaheddine Haddad",
+      "bio_fr": "Slaheddine Haddad est un auteur tunisien.",
+      "bio_en": "Slaheddine Haddad is a Tunisian author.",
+      "bio_ar": "صلاح الدين حداد كاتب تونسي.",
+      "photo": "/images/seed/unnamed.jpg"
+    },
+    {
+      "name": "Mohamed Walim Rokbani",
+      "bio_fr": "Mohamed Walim Rokbani est un auteur tunisien.",
+      "bio_en": "Mohamed Walim Rokbani is a Tunisian author.",
+      "bio_ar": "محمد والي رومباني كاتب تونسي.",
+      "photo": null
+    },
+    {
+      "name": "Mohamed Louadi",
+      "bio_fr": "Mohamed Louadi est un auteur tunisien.",
+      "bio_en": "Mohamed Louadi is a Tunisian author.",
+      "bio_ar": "محمد اللوادي كاتب تونسي.",
+      "photo": null
+    },
+    {
+      "name": "Mohamed Yacoub",
+      "bio_fr": "Mohamed Yacoub est un spécialiste de l'archéologie et du patrimoine tunisien.",
+      "bio_en": "Mohamed Yacoub is a specialist in Tunisian archaeology and heritage.",
+      "bio_ar": "محمد يعقوب متخصص في الآثار والتراث التونسي.",
+      "photo": "/images/seed/151274801949_content.jpg"
+    },
+    {
+      "name": "Möez Majed",
+      "bio_fr": "Möez Majed est un poète tunisien.",
+      "bio_en": "Möez Majed is a Tunisian poet.",
+      "bio_ar": "معاذ ماجدة شاعر تونسي.",
+      "photo": "/images/seed/Moez_majed.jpg"
+    },
+    {
+      "name": "Samar Mannaa",
+      "bio_fr": "Samar Mannaa est une écrivaine tunisienne.",
+      "bio_en": "Samar Mannaa is a Tunisian writer.",
+      "bio_ar": "سمر منا كاتبة تونسية.",
+      "photo": null
+    },
+    {
+      "name": "Saloua Mestiri",
+      "bio_fr": "Saloua Mestiri est une écrivaine et poète tunisienne.",
+      "bio_en": "Saloua Mestiri is a Tunisian writer and poet.",
+      "bio_ar": "سلوى المستيري كاتبة وشاعرة تونسية.",
+      "photo": "/images/seed/saloua-mestiri.jpg"
+    },
+    {
+      "name": "Ridha Boukhris",
+      "bio_fr": "Ridha Boukhris est un universitaire et auteur tunisien.",
+      "bio_en": "Ridha Boukhris is a Tunisian academic and author.",
+      "bio_ar": "رضا بوحريسات أكاديمي وكاتب تونسي.",
+      "photo": "/images/seed/Capture-décran-2023-07-09-à-2.25.56-PM.png"
+    },
+    {
+      "name": "Paul Eudel",
+      "bio_fr": "Paul Eudel est un auteur français spécialisé dans l'étude des bijoux d'Afrique du Nord.",
+      "bio_en": "Paul Eudel is a French author specializing in North African jewelry.",
+      "bio_ar": "بول إيوديل مؤلف فرنسي متخصص في المجوهرات شمال أفريقيا.",
+      "photo": null
+    },
+    {
+      "name": "Mustapha Kilani",
+      "bio_fr": "Mustapha Kilani est un auteur tunisien.",
+      "bio_en": "Mustapha Kilani is a Tunisian author.",
+      "bio_ar": "مصطفى كيلاني كاتب تونسي.",
+      "photo": null
+    },
+    {
+      "name": "Hamma Hanachi",
+      "bio_fr": "Hamma Hanachi est un auteur tunisien.",
+      "bio_en": "Hamma Hanachi is a Tunisian author.",
+      "bio_ar": "حمة حناشي كاتب تونسي.",
+      "photo": "/images/seed/279039821_368025502006541_6529454653919790354_n.jpg"
+    },
+    {
+      "name": "Houssine Kahwagi",
+      "bio_fr": "Houssine Kahwagi est un poète tunisien.",
+      "bio_en": "Houssine Kahwagi is a Tunisian poet.",
+      "bio_ar": "حسين كحفة شاعر تونسي.",
+      "photo": "/images/seed/Hussein-Kahweji.jpg"
+    },
+    {
+      "name": "Aicha Filali",
+      "bio_fr": "Aicha Filali est une écrivaine et photographe tunisienne.",
+      "bio_en": "Aicha Filali is a Tunisian writer and photographer.",
+      "bio_ar": "عائشة فلبي كاتبة ومصورة تونسية.",
+      "photo": "/images/seed/images-1.jpeg"
+    },
+    {
+      "name": "Azza Filali",
+      "bio_fr": "Azza Filali est une photographe tunisienne.",
+      "bio_en": "Azza Filali is a Tunisian photographer.",
+      "bio_ar": "عزة فلبي مصورة تونسية.",
+      "photo": "/images/seed/images.jpeg"
+    },
+    {
+      "name": "Ala Lassoued",
+      "bio_fr": "Ala Lassoued est un auteur tunisien.",
+      "bio_en": "Ala Lassoued is a Tunisian author.",
+      "bio_ar": "علاء لسعود كاتب تونسي.",
+      "photo": null
+    },
+    {
+      "name": "Ahmed Albahi",
+      "bio_fr": "Ahmed Albahi est un spécialiste du soufisme et de la spiritualité islamique.",
+      "bio_en": "Ahmed Albahi is a specialist in Sufism and Islamic spirituality.",
+      "bio_ar": "أحمد albahi متخصص في التصوف والروحانية الإسلامية.",
+      "photo": "/images/seed/s200_ahmed.el_bahi.jpeg"
+    },
+    {
+      "name": "Abdelkrim Chalbi",
+      "bio_fr": "Abdelkrim Chalbi est un auteur tunisien.",
+      "bio_en": "Abdelkrim Chalbi is a Tunisian author.",
+      "bio_ar": "عبد الكريمشلبي كاتب تونسي.",
+      "photo": null
+    },
+    {
+      "name": "Kahina Abbass",
+      "bio_fr": "Kahina Abbass est une écrivaine tunisienne.",
+      "bio_en": "Kahina Abbass is a Tunisian writer.",
+      "bio_ar": "كاهنة عباس كاتبة تونسية.",
+      "photo": null
+    }
+  ],
+  "books": [
+    {
+      "title": "Kairouan : la ville et ses saints Lectures hagiographiques",
+      "title_en": "Kairouan: The City and Its Saints - Hagiographic Readings",
+      "title_ar": "القيروان: المدينة وقديسيها - قراءات سيرية ذاتية",
+      "description": "Que nous dit la tradition bio-hagiographique kairouanaise de la relation de la ville avec ses saints ? Nelly Amri réunit ici le fruit d'un travail étalé sur plusieurs années.",
+      "description_en": "What does the Kairouanese bio-hagiographic tradition tell us about the city's relationship with its saints? Nelly Amri brings together here the fruit of work spread over several years.",
+      "description_ar": "ماذا تقول التقاليد السيرة الذاتية للقيروان عن علاقة المدينة بقديسها؟ نللي عمري تجمع هنا ثمرة عمل امتد لعدة سنوات.",
+      "price_dt": 35,
+      "price_eur": 17,
+      "author_name": "Nelly Amri",
+      "year": 2023,
+      "category": "Histoire",
+      "language": "Français",
+      "pages": 280,
+      "isbn": "978-9938-00-001-1",
+      "cover": "/images/seed/Capture-decran-2026-04-06-a-10.51.00-AM-450x608.png"
+    },
+    {
+      "title": "Le voyage archéologique de Victor Guérin dans la régence de Tunis en 1860",
+      "title_en": "Victor Guérin's Archaeological Journey in the Regency of Tunis in 1860",
+      "title_ar": "الرحلة الأثرية لفيكتور غيران في بايلق تونس عام 1860",
+      "description": "Le voyage archéologique de Victor Guérin dans la régence de Tunis en 1860.",
+      "description_en": "Victor Guérin's archaeological journey in the Regency of Tunis in 1860.",
+      "description_ar": "الرحلة الأثرية لفيكتور غيران في بايلق تونس عام 1860.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Abdelmajid Ennabli",
+      "year": 2022,
+      "category": "Archéologie",
+      "language": "Français",
+      "pages": 200,
+      "isbn": "978-9938-00-002-8",
+      "cover": "/images/seed/livre-pour-internet-scaled-450x639.jpeg"
+    },
+    {
+      "title": "Abrégé de la Médina de Tunis",
+      "title_en": "Summary of the Medina of Tunis",
+      "title_ar": "مختصر مدينة تونس",
+      "description": "Du Tunes des historiens grecs de l'Antiquité à al-Hâdhira des chroniqueurs autochtones de l'époque moderne.",
+      "description_en": "From Tunes of the Greek historians of Antiquity to al-Hâdhira of the native chroniclers of the modern era.",
+      "description_ar": "من تُونَة مؤرخي الإغريق في العصور القديمة إلى الحاضرة.",
+      "price_dt": 45,
+      "price_eur": 22,
+      "author_name": "Hassen El Annabi",
+      "year": 2021,
+      "category": "Histoire",
+      "language": "Français",
+      "pages": 320,
+      "isbn": "978-9938-00-003-5",
+      "cover": "/images/seed/median-tunis-450x716.png"
+    },
+    {
+      "title": "CHRONIQUES D'ARCHÉOLOGIE MAGHRÉBINE",
+      "title_en": "CHRONICLES OF MAGHREBI ARCHAEOLOGY",
+      "title_ar": "أخبار آثار المغرب العربي",
+      "description": "Chroniques d'archéologie maghrébine - Un collectif de recherches approfondies.",
+      "description_en": "Chronicles of Maghrebi archaeology - A collective of in-depth research.",
+      "description_ar": "أخبار آثار المغرب العربي - مجموعة من الأبحاث المعمقة.",
+      "price_dt": 35,
+      "price_eur": 17,
+      "author_name": "Collectif d'auteurs",
+      "year": 2020,
+      "category": "Archéologie",
+      "language": "Français",
+      "pages": 250,
+      "isbn": "978-9938-00-004-2",
+      "cover": "/images/seed/chronique-450x716.png"
+    },
+    {
+      "title": "Visa pour le monde",
+      "title_en": "Visa for the World",
+      "title_ar": "تأشيرة للعالم",
+      "description": "Un regard sur le monde et ses sociétés contemporaines.",
+      "description_en": "A look at the world and its contemporary societies.",
+      "description_ar": "نظرة على العالم ومجتمعاته المعاصرة.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Michel Pieffer",
+      "year": 2019,
+      "category": "Essai",
+      "language": "Français",
+      "pages": 180,
+      "isbn": "978-9938-00-005-9",
+      "cover": "/images/seed/visa-450x716.png"
+    },
+    {
+      "title": "Visado para el mundo",
+      "title_en": "Visa for the World (Spanish)",
+      "title_ar": "تأشيرة للعالم (إسبانية)",
+      "description": "Un regard sur le monde en espagnol.",
+      "description_en": "A look at the world in Spanish.",
+      "description_ar": "نظرة على العالم بالإسبانية.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Michel Pieffer",
+      "year": 2019,
+      "category": "Essai",
+      "language": "Espagnol",
+      "pages": 180,
+      "isbn": "978-9938-00-006-6",
+      "cover": "/images/seed/visa-es-450x716.png"
+    },
+    {
+      "title": "Mémoire en raccourcis - تونس بورقيبة و أشياء أخرى",
+      "title_en": "Memory in Shortcuts - Bourguiba's Tunisia and Other Things",
+      "title_ar": "الذاكرة اختصاراً - تونس بورقيبة وأشياء أخرى",
+      "description": "Mémoire en raccourcis sur la Tunisie de Bourguiba.",
+      "description_en": "Memory in shortcuts about Bourguiba's Tunisia.",
+      "description_ar": "الذاكرة اختصاراً عن تونس بورقيبة.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Aicha Filali",
+      "year": 2018,
+      "category": "Mémoires",
+      "language": "Français",
+      "pages": 150,
+      "isbn": "978-9938-00-007-3",
+      "cover": "/images/seed/bourguiba-450x716.png"
+    },
+    {
+      "title": "Rosellini Hergla et le Cinéma",
+      "title_en": "Rosellini, Hergla and Cinema",
+      "title_ar": "روزينيلي، هرقلة والسينما",
+      "description": "Étude sur Rosellini, Hergla et leur rapport au cinéma.",
+      "description_en": "Study on Rosellini, Hergla and their relationship to cinema.",
+      "description_ar": "دراسة حول روزينيلي، هرقلة وعلاقتهم بالسينما.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Collectif d'auteurs",
+      "year": 2017,
+      "category": "Cinéma",
+      "language": "Français",
+      "pages": 220,
+      "isbn": "978-9938-00-008-0",
+      "cover": "/images/seed/Roseellini-450x716.png"
+    },
+    {
+      "title": "Carthage antique des origines jusqu'à l'invasion vandale (-814 - 439)",
+      "title_en": "Ancient Carthage from Origins to the Vandal Invasion (-814 - 439)",
+      "title_ar": "قرطاج القديمة من الأصول حتى غزو الوندال (-814 - 439)",
+      "description": "Une étude approfondie de Carthage antique.",
+      "description_en": "An in-depth study of ancient Carthage.",
+      "description_ar": "دراسة معمقة عن قرطاج القديمة.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Aounallah",
+      "year": 2016,
+      "category": "Histoire",
+      "language": "Français",
+      "pages": 190,
+      "isbn": "978-9938-00-009-7",
+      "cover": "/images/seed/carthage-antique-450x716.jpg"
+    },
+    {
+      "title": "MERMINUS INFINITIF",
+      "title_en": "MERMINUS INFINITIVE",
+      "title_ar": "ميرمينوس إنفينيتيف",
+      "description": "Prix Comar d'Or 2020. L'œuvre de Samir Makhlouf déconstruit les territoires des émotions.",
+      "description_en": "Comar d'Or Prize 2020. Samir Makhlouf's work deconstructs the territories of emotions.",
+      "description_ar": "جائزة الكومار الذهبي 2020. عمل سمير مخلوف يتفكك مناطق المشاعر.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Makhlouf",
+      "year": 2020,
+      "category": "Roman",
+      "language": "Français",
+      "pages": 160,
+      "isbn": "978-9938-00-010-3",
+      "cover": "/images/seed/merminus-comar-450x716.png"
+    },
+    {
+      "title": "سواح العشق",
+      "title_en": "Travelers of Love",
+      "title_ar": "سواح العشق",
+      "description": "Un recueil de poésie en arabe.",
+      "description_en": "A collection of poetry in Arabic.",
+      "description_ar": "ديوان شعر بالعربية.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Ali Louati",
+      "year": 2015,
+      "category": "Poésie",
+      "language": "Arabe",
+      "pages": 120,
+      "isbn": "978-9938-00-011-0",
+      "cover": "/images/seed/souah-aichk-450x716.png"
+    },
+    {
+      "title": "بستاني الخمسة عشر مساء",
+      "title_en": "Gardener of the Fifteen Evenings",
+      "title_ar": "بستاني الخمسة عشر مساء",
+      "description": "Un recueil poétique collaboratif.",
+      "description_en": "A collaborative poetic collection.",
+      "description_ar": "مجموعة شعرية تعاونية.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Ali Louati",
+      "year": 2014,
+      "category": "Poésie",
+      "language": "Arabe",
+      "pages": 100,
+      "isbn": "978-9938-00-012-7",
+      "cover": "/images/seed/bostani-1-450x716.png"
+    },
+    {
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Aicha Filali",
+      "year": 2018,
+      "category": "Mémoires",
+      "language": "Français",
+      "pages": 150,
+      "isbn": "978-9938-00-007-3",
+      "cover": "/images/seed/bourguiba-450x716.png"
+    },
+    {
+      "title": "Rosellini Hergla et le Cinéma",
+      "title_en": "Rosellini, Hergla and Cinema",
+      "title_ar": "روزينيلي، هرقلة والسينما",
+      "description": "Étude sur Rosellini, Hergla et leur rapport au cinéma.",
+      "description_en": "Study on Rosellini, Hergla and their relationship to cinema.",
+      "description_ar": "دراسة حول روزينيلي، هرقلة وعلاقتهم بالسينما.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Collectif d'auteurs",
+      "year": 2017,
+      "category": "Cinéma",
+      "language": "Français",
+      "pages": 220,
+      "isbn": "978-9938-00-008-0",
+      "cover": "/images/seed/Roseellini-450x716.png"
+    },
+    {
+      "title": "Carthage antique des origines jusqu'à l'invasion vandale (-814 - 439)",
+      "title_en": "Ancient Carthage from Origins to the Vandal Invasion (-814 - 439)",
+      "title_ar": "قرطاج القديمة من الأصول حتى غزو الوندال (-814 - 439)",
+      "description": "Une étude approfondie de Carthage antique.",
+      "description_en": "An in-depth study of ancient Carthage.",
+      "description_ar": "دراسة معمقة عن قرطاج القديمة.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Aounallah",
+      "year": 2016,
+      "category": "Histoire",
+      "language": "Français",
+      "pages": 190,
+      "isbn": "978-9938-00-009-7",
+      "cover": "/images/seed/carthage-antique-450x716.jpg"
+    },
+    {
+      "title": "MERMINUS INFINITIF",
+      "title_en": "MERMINUS INFINITIVE",
+      "title_ar": "ميرمينوس إنفينيتيف",
+      "description": "Prix Comar d'Or 2020. L'œuvre de Samir Makhlouf déconstruit les territoires des émotions.",
+      "description_en": "Comar d'Or Prize 2020. Samir Makhlouf's work deconstructs the territories of emotions.",
+      "description_ar": "جائزة الكومار الذهبي 2020. عمل سمير مخلوف يتفكك مناطق المشاعر.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Makhlouf",
+      "year": 2020,
+      "category": "Roman",
+      "language": "Français",
+      "pages": 160,
+      "isbn": "978-9938-00-010-3",
+      "cover": "/images/seed/merminus-comar-450x716.png"
+    },
+    {
+      "title": "سواح العشق",
+      "title_en": "Travelers of Love",
+      "title_ar": "سواح العشق",
+      "description": "Un recueil de poésie en arabe.",
+      "description_en": "A collection of poetry in Arabic.",
+      "description_ar": "ديوان شعر بالعربية.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Ali Louati",
+      "year": 2015,
+      "category": "Poésie",
+      "language": "Arabe",
+      "pages": 120,
+      "isbn": "978-9938-00-011-0",
+      "cover": "/images/seed/souah-aichk-450x716.png"
+    },
+    {
+      "title": "بستاني الخمسة عشر مساء",
+      "title_en": "Gardener of the Fifteen Evenings",
+      "title_ar": "بستاني الخمسة عشر مساء",
+      "description": "Un recueil poétique collaboratif.",
+      "description_en": "A collaborative poetic collection.",
+      "description_ar": "مجموعة شعرية تعاونية.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Ali Louati",
+      "year": 2014,
+      "category": "Poésie",
+      "language": "Arabe",
+      "pages": 100,
+      "isbn": "978-9938-00-012-7",
+      "cover": "/images/seed/bostani-1-450x716.png"
+    },
+    {
+      "title": "D'une oasis à l'autre",
+      "title_en": "From One Oasis to Another",
+      "title_ar": "من واحة إلى أخرى",
+      "description": "Prix Spécial du Jury Comar d'Or 2025. Roman engagé plaidant pour la préservation de l'oasis de Gabès.",
+      "description_en": "Special Jury Prize Comar d'Or 2025. Engaged novel advocating for the preservation of the Gabès oasis.",
+      "description_ar": "جائزة الكومار الذهبي 2025. رواية تدافع عن حماية واحة قابس.",
+      "price_dt": 18,
+      "price_eur": 9,
+      "author_name": "Abdellatif Mrabet",
+      "year": 2025,
+      "category": "Roman",
+      "language": "Français",
+      "pages": 240,
+      "isbn": "978-9938-00-013-4",
+      "cover": "/images/seed/Abdelatif-Mrabet.jpg"
+    },
+    {
+      "title": "Le vert et le bleu",
+      "title_en": "The Green and the Blue",
+      "title_ar": "الأخضر والأزرق",
+      "description": "Prix Spécial du Jury Comar d'Or 2025. Roman engagé plaidant pour la préservation de l'oasis de Gabès.",
+      "description_en": "Special Jury Prize Comar d'Or 2025. Engaged novel advocating for the preservation of the Gabès oasis.",
+      "description_ar": "جائزة الكومار الذهبي 2025. رواية تدافع عن حماية واحة قابس.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Abdellatif Mrabet",
+      "year": 2025,
+      "category": "Roman",
+      "language": "Français",
+      "pages": 220,
+      "isbn": "978-9938-00-014-1",
+      "cover": "/images/seed/dune-oasis-450x716.png"
+    },
+    {
+      "title": "Grabuge",
+      "title_en": "Ruckus",
+      "title_ar": "الفوضى",
+      "description": "Un recueil de poésie de 96 pages.",
+      "description_en": "A 96-page poetry collection.",
+      "description_ar": "ديوان شعر من 96 صفحة.",
+      "price_dt": 10,
+      "price_eur": 5,
+      "author_name": "Hichem Ben Ammar",
+      "year": 2020,
+      "category": "Poésie",
+      "language": "Français",
+      "pages": 96,
+      "isbn": "978-9938-00-015-8",
+      "cover": "/images/seed/garbuge-450x716.png"
+    },
+    {
+      "title": "مواهب الربّ العليّ في جوازطي الأرض للولي",
+      "title_en": "The Talents of the Most High in Justifying the Earth for the Saint",
+      "title_ar": "مواهب الربّ العليّ في جوازطي الأرض للولي",
+      "description": "Un texte classique de soufisme.",
+      "description_en": "A classical text of Sufism.",
+      "description_ar": "نص كلاسيكي في التصوف.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Mouayed El Mnari",
+      "year": 2019,
+      "category": "Soufisme",
+      "language": "Arabe",
+      "pages": 180,
+      "isbn": "978-9938-00-016-5",
+      "cover": "/images/seed/mawahib-450x716.png"
+    },
+    {
+      "title": "SUR LES PAS DES MAÎTRES",
+      "title_en": "IN THE FOOTSTEPS OF THE MASTERS",
+      "title_ar": "على خطى الأساتذة",
+      "description": "Entre Orient et Occident musulman, l'Ifrîqiya au cœur des échanges soufis.",
+      "description_en": "Between Muslim East and West, Ifriqiya at the heart of Sufi exchanges.",
+      "description_ar": "بين المشرق والمغرب الإسلامي، إفريقية في قلب التبادلات الصوفية.",
+      "price_dt": 30,
+      "price_eur": 15,
+      "author_name": "Nelly Amri",
+      "year": 2023,
+      "category": "Soufisme",
+      "language": "Français",
+      "pages": 320,
+      "isbn": "978-9938-00-017-2",
+      "cover": "/images/seed/324261394_856734652225888_755581397574725456_n-300x471.jpeg"
+    },
+    {
+      "title": "Artistes de Tunisie et d'ailleurs : Écrits sur l'art contemporain 1983-2016",
+      "title_en": "Artists from Tunisia and Elsewhere: Writings on Contemporary Art 1983-2016",
+      "title_ar": "فنانون من تونس وغيرها: كتابات عن الفن المعاصر 1983-2016",
+      "description": "Une collection d'écrits sur l'art contemporain.",
+      "description_en": "A collection of writings on contemporary art.",
+      "description_ar": "مجموعة من الكتابات عن الفن المعاصر.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Ali Louati",
+      "year": 2017,
+      "category": "Art",
+      "language": "Français",
+      "pages": 200,
+      "isbn": "978-9938-00-018-9",
+      "cover": "/images/seed/artistes-de-tunisie-450x716.jpg"
+    },
+    {
+      "title": "Dictionnaire des bijoux de l'Afrique du nord Maroc, Algérie, Tunisie, Tripolitaine",
+      "description": "Un dictionnaire des bijoux d'Afrique du Nord.",
+      "description_ar": "قاموس مجوهرات شمال أفريقيا.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Paul Eudel",
+      "cover": "/images/seed/bijoux-450x716.jpg"
+    },
+    {
+      "title": "Elle,",
+      "description": "Un roman de Hamma Hanachi.",
+      "description_ar": "رواية لهamma Hanachi.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Hamma Hanachi",
+      "cover": "/images/seed/elle-450x716.png"
+    },
+    {
+      "title": "Être Palestinien au Liban",
+      "description": "Un témoignage sur la condition palestinienne au Liban.",
+      "description_ar": "شهادة على الحالة الفلسطينية في لبنان.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samar Mannaa",
+      "cover": "/images/seed/etre-palestinien-450x716.jpg"
+    },
+    {
+      "title": "Héraclés",
+      "description": "Un texte d'Ali Louati.",
+      "description_ar": "نص لعلي اللواتي.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Ali Louati",
+      "cover": "/images/seed/heracles-450x716.png"
+    },
+    {
+      "title": "Je ne saurai jamais",
+      "description": "Un roman de Slaheddine Haddad.",
+      "description_ar": "رواية لصلاح الدين حداد.",
+      "price_dt": 22,
+      "price_eur": 11,
+      "author_name": "Slaheddine Haddad",
+      "cover": "/images/seed/nesauraisjamais-450x716.png"
+    },
+    {
+      "title": "Je te nommerai",
+      "description": "Un roman de Saloua Mestiri.",
+      "description_ar": "رواية لسلوى المستيري.",
+      "price_dt": 18,
+      "price_eur": 9,
+      "author_name": "Saloua Mestiri",
+      "cover": "/images/seed/je-te-nommerai-450x716.jpg"
+    },
+    {
+      "title": "Kairouan La Grande Mosquée",
+      "description": "Un ouvrage sur la Grande Mosquée de Kairouan.",
+      "description_ar": "كتاب عن المسجد الأعظم في القيروان.",
+      "price_dt": 6,
+      "price_eur": 3,
+      "author_name": "Neji Djelloul",
+      "cover": "/images/seed/kairouan-grande-mosquee-450x716.png"
+    },
+    {
+      "title": "L'art de bât ir au jérid",
+      "description": "Un étude sur l'architecture traditionnelle du Jérid.",
+      "description_ar": "دراسة عن العمارة التقليدية في الجريد.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Abdellatif Mrabet",
+      "cover": "/images/seed/art-batir-jerid-450x716.png"
+    },
+    {
+      "title": "L'homme de Gayeh",
+      "description": "Un roman de Samir Makhlouf.",
+      "description_ar": "رواية لسمير مخلوف.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Makhlouf",
+      "cover": "/images/seed/LhommedeGayeh-450x716.png"
+    },
+    {
+      "title": "L'abrégé du Musée National du Bardo",
+      "description": "Un abrégé du Musée National du Bardo.",
+      "description_ar": "موجز متحف باردو الوطني.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Aounallah",
+      "cover": "/images/seed/abregee-450x716.jpg"
+    },
+    {
+      "title": "Le bruit des étoiles",
+      "description": "Un roman de Mohamed Walim Rokbani.",
+      "description_ar": "رواية لمحمد والي رومباني.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Mohamed Walim Rokbani",
+      "cover": "/images/seed/le-bruit-des-etoiles-450x716.jpg"
+    },
+    {
+      "title": "Le Musée Archéologique de Sousse",
+      "description": "Un guide du Musée Archéologique de Sousse.",
+      "description_ar": "دليل متحف سوسة الأثري.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samir Aounallah",
+      "cover": "/images/seed/musee-sousse-450x716.jpg"
+    },
+    {
+      "title": "Les auto-stoppeurs",
+      "description": "Un recueil de Slaheddine Haddad.",
+      "description_ar": "مجموعة لصلاح الدين حداد.",
+      "price_dt": 5,
+      "price_eur": 3,
+      "author_name": "Slaheddine Haddad",
+      "cover": "/images/seed/les-autostoppeurs-450x716.png"
+    },
+    {
+      "title": "Les Merveilles Du Musée Du Bardo",
+      "description": "Les merveilles du Musée du Bardo.",
+      "description_ar": "عجائب متحف باردو.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Mohamed Yacoub",
+      "cover": "/images/seed/merveilles-musee-bardo-450x716.png"
+    },
+    {
+      "title": "Les rêveries d'un cerisier en fleurs",
+      "description": "Un recueil de Möez Majed.",
+      "description_ar": "مجموعة لمعاذ ماجدة.",
+      "price_dt": 5,
+      "price_eur": 3,
+      "author_name": "Möez Majed",
+      "cover": "/images/seed/reveries-450x716.png"
+    },
+    {
+      "title": "Littérature de femmes tunisiennes",
+      "description": "Une étude sur la littérature de femmes tunisiennes.",
+      "description_ar": "دراسة عن أدب المرأة التونسية.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Ridha Boukhris",
+      "cover": "/images/seed/litterature-450x716.png"
+    },
+    {
+      "title": "MAHDIA Capitale des Fâtimides",
+      "description": "Un étude sur Mahdia, capitale des Fâtimides.",
+      "description_ar": "دراسة عن المهدية عاصمة الفاطميين.",
+      "price_dt": 13,
+      "price_eur": 7,
+      "author_name": "Neji Djelloul",
+      "cover": "/images/seed/mahdia-450x716.png"
+    },
+    {
+      "title": "Malerei in stein : Die mosaiken des Bardo-museums",
+      "description": "Les mosaïques du Musée du Bardo.",
+      "description_ar": "فسيفساء متحف باردو.",
+      "price_dt": 14,
+      "price_eur": 7,
+      "author_name": "Mohamed Yacoub",
+      "cover": "/images/seed/malerei-450x716.jpg"
+    },
+    {
+      "title": "Peinture de Pierres : Les Mosaïque du Musée du Bardo",
+      "description": "Les mosaïques du Musée du Bardo.",
+      "description_ar": "فسيفساء متحف باردو.",
+      "price_dt": 14,
+      "price_eur": 7,
+      "author_name": "Mohamed Yacoub",
+      "cover": "/images/seed/peintures-pierres-450x716.png"
+    },
+    {
+      "title": "Ser Palestino en el Libano",
+      "description": "Être Palestinien au Liban en espagnol.",
+      "description_ar": "أن تكون فلسطينياً في لبنان بالإسبانية.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Samar Mannaa",
+      "cover": "/images/seed/ser-palestino-450x716.jpg"
+    },
+    {
+      "title": "Sîdî Abû Sa'îd al-Bâjî",
+      "description": "Un étude sur Sîdî Abû Sa'îd al-Bâjî.",
+      "description_ar": "دراسة عن سيدي أبو سعيد الباجي.",
+      "price_dt": 22,
+      "price_eur": 11,
+      "author_name": "Nelly Amri",
+      "cover": "/images/seed/sidibou-450x716.png"
+    },
+    {
+      "title": "SOUSSE : L'antique Hadrumetum",
+      "description": "Un étude sur Sousse antique.",
+      "description_ar": "دراسة عن سوسة القديمة.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Neji Djelloul",
+      "cover": "/images/seed/sousse-450x716.png"
+    },
+    {
+      "title": "SPLENDEURS DE DOUGGA",
+      "description": "Les splendeurs de Dougga.",
+      "description_ar": "روائع دوغا.",
+      "price_dt": 35,
+      "price_eur": 17,
+      "author_name": "Samir Aounallah",
+      "cover": "/images/seed/SPLEENDEURS-450x716.png"
+    },
+    {
+      "title": "Stone Painting : The mosaics of the Bardo Museum",
+      "description": "Les mosaïques du Musée du Bardo en anglais.",
+      "description_ar": "فسيفساء متحف باردو بالإنجليزية.",
+      "price_dt": 14,
+      "price_eur": 7,
+      "author_name": "Mohamed Yacoub",
+      "cover": "/images/seed/stone-450x716.jpg"
+    },
+    {
+      "title": "Thugga Dougga : Ville romano-africaine de Tunisie",
+      "description": "Un guide de Thugga Dougga.",
+      "description_ar": "دليل ثوغا دوغا.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Samir Aounallah",
+      "cover": "/images/seed/dougga-450x716.png"
+    },
+    {
+      "title": "Thysdrus /El Jem : Site, Momuments et parc archéologique",
+      "description": "Un guide de Thysdrus/El Jem.",
+      "description_ar": "دليل ثيسدروس/الجم.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Abdellatif Mrabet",
+      "cover": "/images/seed/thysdrus-450x716.png"
+    },
+    {
+      "title": "Un 'manuel' ifrîqiyen d'adab soufi",
+      "description": "Un manuel ifrîqiyen d'adab soufi.",
+      "description_ar": "دليل ifrîqiyen لأدب الصوفية.",
+      "price_dt": 16,
+      "price_eur": 8,
+      "author_name": "Nelly Amri",
+      "cover": "/images/seed/adab-soufi-450x716.png"
+    },
+    {
+      "title": "Une jeunesse d'enfer",
+      "description": "Un roman de Mohamed Louadi.",
+      "description_ar": "رواية لمحمد اللوادي.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Mohamed Louadi",
+      "cover": "/images/seed/jeunesse-enfer-450x716.jpg"
+    },
+    {
+      "title": "أحفاد سقراط وصلوا قرطاجة",
+      "description": "Un recueil de poésie.",
+      "description_ar": "ديوان شعر.",
+      "price_dt": 6,
+      "price_eur": 3,
+      "author_name": "Houssine Kahwagi",
+      "cover": "/images/seed/ahfad-soukrat-450x716.png"
+    },
+    {
+      "title": "الأسرار الجلية في المناقب الدهمانية",
+      "description": "Un texte classique de soufisme.",
+      "description_ar": "نص كلاسيكي في التصوف.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Abdelkrim Chalbi",
+      "cover": "/images/seed/dahmani-450x716.png"
+    },
+    {
+      "title": "التصوف بإفريقية في العصر الوسيط",
+      "description": "يتناول الكتاب مسألة الولاية والتصوف في التجربة الإفريقية.",
+      "description_ar": "يتناول الكتاب مسألة الولاية والتصوف في التجربة الإفريقية.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Nelly Amri",
+      "cover": "/images/seed/tasaouef-ifriquia-1-450x716.png"
+    },
+    {
+      "title": "الجنرال و طيفها في الأعالي",
+      "description": "Un roman de Mustapha Kilani.",
+      "description_ar": "رواية لمصطفى كيلاني.",
+      "price_dt": 10,
+      "price_eur": 5,
+      "author_name": "Mustapha Kilani",
+      "cover": "/images/seed/general-450x716.png"
+    },
+    {
+      "title": "الطرازات الموشية في مناقب السادات الوحيشية",
+      "description": "Un texte de soufisme.",
+      "description_ar": "نص عن التصوف.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Mouayed El Mnari",
+      "cover": "/images/seed/tirazeet-450x716.png"
+    },
+    {
+      "title": "النساء الصالحات في المدونة المنقبية لبلاد المغرب",
+      "description": "يتناول الكتاب مسألة النساء الصالحات في المدونة المنقبية.",
+      "description_ar": "يتناول الكتاب مسألة النساء الصالحات في المدونة المنقبية.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Ala Lassoued",
+      "cover": "/images/seed/nisa2-450x716.png"
+    },
+    {
+      "title": "حديث الذاكرة",
+      "description": "Un recueil de Kahina Abbass.",
+      "description_ar": "مجموعة لكاهنة عباس.",
+      "price_dt": 5,
+      "price_eur": 3,
+      "author_name": "Kahina Abbass",
+      "cover": "/images/seed/hadith-adhakira-450x716.png"
+    },
+    {
+      "title": "خطوط على جدار الذاكرة",
+      "description": "Un recueil d'Ali Louati.",
+      "description_ar": "مجموعة لعلي اللواتي.",
+      "price_dt": 10,
+      "price_eur": 5,
+      "author_name": "Ali Louati",
+      "cover": "/images/seed/khoutout-450x716.png"
+    },
+    {
+      "title": "شعراء من فرنسا",
+      "description": "Un recueil d'Ali Louati.",
+      "description_ar": "مجموعة لعلي اللواتي.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Ali Louati",
+      "cover": "/images/seed/343739615_187091804154969_4919690284316098688_n-450x690.jpeg"
+    },
+    {
+      "title": "فجر من وراء الزيتون ينهض",
+      "description": "Un recueil de Houssine Kahwagi.",
+      "description_ar": "مجموعة لحسين كحفة.",
+      "price_dt": 9,
+      "price_eur": 5,
+      "author_name": "Houssine Kahwagi",
+      "cover": "/images/seed/fajr-450x716.png"
+    },
+    {
+      "title": "كل عشبةٍ صوتها... و كل غيمةٍ كذلك",
+      "description": "Un recueil de Mohamed Ghozzi.",
+      "description_ar": "مجموعة لمحمد الغزي.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Mohamed Ghozzi",
+      "cover": "/images/seed/koll-450x716.png"
+    },
+    {
+      "title": "كمان البيت و شمعدانه",
+      "description": "Un recueil de Houssine Kahwagi.",
+      "description_ar": "مجموعة لحسين كحفة.",
+      "price_dt": 6,
+      "price_eur": 3,
+      "author_name": "Houssine Kahwagi",
+      "cover": "/images/seed/kaman-450x716.png"
+    },
+    {
+      "title": "من أجل بياتريس",
+      "description": "Un recueil d'Ali Louati.",
+      "description_ar": "مجموعة لعلي اللواتي.",
+      "price_dt": 8,
+      "price_eur": 4,
+      "author_name": "Ali Louati",
+      "cover": "/images/seed/beatrice-450x716.png"
+    },
+    {
+      "title": "مناقب أبي القاسم المسراتي المعروف بصاحب الدربالة",
+      "description": "Un texte de soufisme.",
+      "description_ar": "نص عن التصوف.",
+      "price_dt": 8,
+      "price_eur": 4,
+      "author_name": "Ahmed Albahi",
+      "cover": "/images/seed/manakib-misrati-450x716.png"
+    },
+    {
+      "title": "مناقب أبي علي سالم التباسي",
+      "description": "Un texte de soufisme.",
+      "description_ar": "نص عن التصوف.",
+      "price_dt": 10,
+      "price_eur": 5,
+      "author_name": "Ahmed Albahi",
+      "cover": "/images/seed/tabbasi-450x716.png"
+    },
+    {
+      "title": "نخاف لا ننسى",
+      "description": "Un roman de Mona Belhaj.",
+      "description_ar": "رواية لمنى بلhaj.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Mona Belhaj",
+      "cover": "/images/seed/nkhaf-450x716.png"
+    },
+    {
+      "title": "هيرقليس",
+      "description": "Un texte d'Ali Louati.",
+      "description_ar": "نص لعلي اللواتي.",
+      "price_dt": 6,
+      "price_eur": 3,
+      "author_name": "Ali Louati",
+      "cover": "/images/seed/heraclis-450x716.png"
+    },
+    {
+      "title": "« J » : Contes des Textures Gestuelles",
+      "description": "Contes des textures gestuelles par Samir Makhlouf.",
+      "description_ar": "حكايات textures gestuelles بقلم سمير مخلوف.",
+      "price_dt": 9,
+      "price_eur": 5,
+      "author_name": "Samir Makhlouf",
+      "cover": "/images/seed/j-450x716.png"
+    },
+    {
+      "title": "« La fin tragique du théâtre » Notes confinées.",
+      "description": "Notes confinées sur la fin tragique du théâtre.",
+      "description_ar": "ملاحظات مقيدة على النهاية المأساوية للمسرح.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Lassaad Ben Abdallah",
+      "cover": "/images/seed/la-fin-tragique-du-thetre-450x716.jpg"
+    },
+    {
+      "title": "Citrons doux",
+      "description": "Un roman de Dora Latiri.",
+      "description_ar": "رواية لدورا latiri.",
+      "price_dt": 12,
+      "price_eur": 6,
+      "author_name": "Dora Latiri",
+      "cover": "/images/seed/citrons-doux-450x716.png"
+    },
+    {
+      "title": "CARTHAGE : Un site d'intérêt culturel et naturel",
+      "description": "Carthage, un site d'intérêt culturel et naturel.",
+      "description_ar": "قرطاج، موقع ذات أهمية ثقافية وطبيعية.",
+      "price_dt": 15,
+      "price_eur": 8,
+      "author_name": "Abdelmajid Ennabli",
+      "cover": "/images/seed/carthage-450x716.png"
+    },
+    {
+      "title": "CARTHAGE BYRSA Passage de l'éphémère",
+      "description": "Carthage Byrsa, passage de l'éphémère.",
+      "description_ar": "قرطاج بيرسا مرور العابر.",
+      "price_dt": 5,
+      "price_eur": 3,
+      "author_name": "Collectif d'auteurs",
+      "cover": "/images/seed/carthage-byrsa-450x716.png"
+    },
+    {
+      "title": "Captures",
+      "description": "Un recueil de photographie par Aicha et Azza Filali.",
+      "description_ar": "مجموعة تصوير فوتوغرافي لآية وعزة فلبي.",
+      "price_dt": 25,
+      "price_eur": 12,
+      "author_name": "Aicha Filali",
+      "cover": "/images/seed/captures-450x716.png"
+    },
+    {
+      "title": "Au nom du père",
+      "description": "Un roman d'Abdellatif Mrabet.",
+      "description_ar": "رواية لعبد اللطيف mrabet.",
+      "price_dt": 20,
+      "price_eur": 10,
+      "author_name": "Abdellatif Mrabet",
+      "cover": "/images/seed/au-nom-du-pere-450x716.png"
+    },
+    {
+      "title": "Lot de 6 Marque page",
+      "description": "Lot de 6 marque-pages.",
+      "description_ar": "مجموعة 6 من bookmarks.",
+      "price_dt": 1.2,
+      "price_eur": 0.6,
+      "author_name": "Collectif d'auteurs",
+      "cover": "/images/seed/marque-pages-450x716.jpg"
+    }
+  ],
+  "news": [
+    {
+      "title": "Prix Comar d'Or 2025 : 'Le vert et le bleu' primé",
+      "content": "Le roman 'Le vert et le bleu' d'Abdellatif Mrabet, publié chez Contraste Éditions, a remporté le Prix Spécial du Jury lors du Comar d'Or 2025. Ce roman engagé est un plaidoyer pour la préservation de l'oasis maritime de Gabès.",
+      "content_ar": "فازت رواية 'الأخضر والأزرق' لعبد اللطيف mrabet، الصادرة عن Contraste Éditions، بالجائزة الخاصة للجنة التحكيم في الكومار الذهبي 2025.",
+      "date": "2025-07-01",
+      "image": "/images/seed/71348719_624011241461340_8686511780668637184_n-768x1024.jpg"
+    },
+    {
+      "title": "Nouveau livre de Nelly Amri : Kairouan et ses saints",
+      "content": "Vient de paraître chez Contraste Éditions : KAIROUAN : LA VILLE ET SES SAINTS. Que nous dit la tradition bio-hagiographique kairouanaise de la relation de la ville avec ses saints ?",
+      "content_ar": "صدر حديثاً عن Contraste Éditions: القيروان: المدينة وقديسوها.",
+      "date": "2026-04-06",
+      "image": "/images/seed/Capture-decran-2026-04-06-a-10.51.00-AM-1236x540.png"
+    },
+    {
+      "title": "Contraste Éditions doublement récompensée au Prix Abdelwaheb Ben Ayed 2022",
+      "content": "Prix du roman en langue française: 'D'une oasis à l'autre' de Abdellatif Mrabet - Prix du recueil de poésie: 'استجب إن دعتك الجبال' de Mohamed Ghozzi.",
+      "content_ar": "جائزة الرواية باللغة الفرنسية: 'من واحة إلى أخرى' - جائزة ديوان الشعر: 'استجب إن دعتك الجبال' لمحمد الغزي.",
+      "date": "2023-07-09",
+      "image": "/images/seed/263526408_327194635899368_3887540881817323470_n-860x470.jpeg"
+    },
+    {
+      "title": "Samir Makhlouf winner of the Comar d'Or 2020",
+      "content": "Le prix du Comar d'Or 2020 pour le meilleur roman tunisien en langue française a été décerné à Samir Makhlouf pour son roman 'Merminus Infinitif'.",
+      "content_ar": "فازت جائزة الكومار الذهبي 2020 لسمير مخلوف عن روايته 'ميرمينوس إنفينيتيف'.",
+      "date": "2020-10-08",
+      "image": "/images/seed/merminus-comar-860x470.png"
+    },
+    {
+      "title": "Contraste Éditions - À Propos",
+      "content": "Contraste éditions se distingue par une ligne éditoriale profondément ancrée dans la mémoire du pays, valorisant les traditions, les lieux, les personnages et les récits qui composent l'identité plurielle de la Tunisie.",
+      "content_ar": "تتميز Contraste Éditions بخط تحريري متجذر بعمق في ذاكرة البلاد.",
+      "date": "2022-02-01",
+      "image": null
+    }
+  ],
+  "hero_sections": [
+    {
+      "title": "Découvrez nos nouveautés",
+      "title_en": "Discover our new releases",
+      "title_ar": "اكتشف أحدث إصداراتنا",
+      "subtitle": "La dernière parution et les actualités du moment.",
+      "subtitle_en": "The latest release and current news.",
+      "subtitle_ar": "أحدث إصدار والأخبار الحالية.",
+      "description": "Un aperçu des dernières publications de Contraste Éditions et des temps forts culturels.",
+      "description_en": "A preview of Contraste Éditions' latest publications and cultural highlights.",
+      "description_ar": "نظرة على أحدث إصدارات Contraste Éditions وأبرز الأحداث الثقافية.",
+      "cta_label": "Voir la sélection",
+      "cta_label_en": "See the selection",
+      "cta_label_ar": "عرض المجموعة",
+      "cta_url": "/fr/livres",
+      "image": null,
+      "type": "latest",
+      "order": 1
+    },
+    {
+      "title": "Notre actualité",
+      "title_en": "Our news",
+      "title_ar": "أخبارنا",
+      "subtitle": "Les événements et parutions récentes à ne pas manquer.",
+      "subtitle_en": "Recent events and releases not to be missed.",
+      "subtitle_ar": "الأحداث والإصدارات الأخيرة التي لا يجب تفويتها.",
+      "description": "Restez informés grâce aux dernières nouvelles de Contraste Éditions.",
+      "description_en": "Stay informed with the latest news from Contraste Éditions.",
+      "description_ar": "ابقَ على اطلاع بآخر أخبار Contraste Éditions.",
+      "cta_label": "Lire les actualités",
+      "cta_label_en": "Read the news",
+      "cta_label_ar": "اقرأ الأخبار",
+      "cta_url": "/fr/actualites",
+      "image": null,
+      "type": "news",
+      "order": 2
+    }
+  ]
+}
