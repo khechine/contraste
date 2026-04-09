@@ -7,6 +7,8 @@ RUN npm ci
 
 COPY . .
 
+RUN echo "NEXT_PUBLIC_DIRECTUS_URL=https://directus.contraste.tn" > .env.production
+
 RUN npm run build
 
 ENV NODE_ENV=production
