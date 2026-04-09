@@ -8,7 +8,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_DIRECTUS_URL: https://directus.contraste.tn
+      NEXT_PUBLIC_DIRECTUS_URL: http://91.134.133.118:8055
     restart: unless-stopped
     networks:
       - app-network
@@ -22,10 +22,11 @@ services:
       DIRECTUS_ENV: "production"
       DIRECTUS_LOG_LEVEL: "info"
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "https://contraste.tn,https://admin.contraste.tn"
+      CORS_ORIGIN: "*"
       CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
       CORS_METHODS: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
       CORS_EXPOSE_HEADERS: "Content-Range"
+      PUBLIC_URL: "http://91.134.133.118:8055"
       DB_CLIENT: "pg"
       DB_HOST: "postgres"
       DB_PORT: "5432"
