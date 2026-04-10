@@ -1,0 +1,44 @@
+name: Deploy contraste.tn
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Permet déclenchement manuel
+
+jobs:
+  deploy:
+    name: 🚀 Déploiement VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: vps805749.ovh.net
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/ubuntu/contraste
+            echo "📥 Pull du code..."
+            git pull origin main
+            echo "🔨 Build et redémarrage..."
+            bash deploy/deploy.sh
+            echo "✅ Déploiement terminé !"
+
+      - name: 🔍 Vérification santé du site
+        run: |
+          sleep 30
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://www.contraste.tn)
+          DIRECTUS=$(curl -sf -o /dev/null -w "%{http_code}" https://directus.contraste.tn/server/health)
+          echo "www.contraste.tn → HTTP $STATUS"
+          echo "directus.contraste.tn → HTTP $DIRECTUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Le site Next.js ne répond pas !"
+            exit 1
+          fi
+          echo "✅ Site opérationnel"

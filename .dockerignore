@@ -3,3 +3,11 @@ admin-mobile/
 node_modules/
 *.log
 .git/
+*.tar
+*.tar.gz
+*.pid
+.DS_Store
+recover-*.sh
+recover-*.js
+recover-*.py
+log.txt

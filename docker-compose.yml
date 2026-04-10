@@ -1,19 +1,31 @@
 version: "3.8"
 
 services:
-  # Main Next.js App
+  # ===========================================
+  # Next.js Frontend App
+  # ===========================================
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_DIRECTUS_URL: ${NEXT_PUBLIC_DIRECTUS_URL:-https://directus.contraste.tn}
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_DIRECTUS_URL: http://directus:8055
+      NEXT_PUBLIC_DIRECTUS_URL: ${NEXT_PUBLIC_DIRECTUS_URL:-https://directus.contraste.tn}
+      DIRECTUS_TOKEN: ${DIRECTUS_TOKEN}
+    depends_on:
+      directus:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network
 
-  # Directus CMS
+  # ===========================================
+  # Directus Headless CMS
+  # ===========================================
   directus:
     image: directus/directus:10.10.0
     ports:
@@ -22,27 +34,33 @@ services:
       DIRECTUS_ENV: "production"
       DIRECTUS_LOG_LEVEL: "info"
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "*"
+      CORS_ORIGIN: "https://www.contraste.tn"
       CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
       CORS_METHODS: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
       CORS_EXPOSE_HEADERS: "Content-Range"
-      PUBLIC_URL: "http://91.134.133.118:8055"
+      PUBLIC_URL: "${DIRECTUS_PUBLIC_URL:-https://directus.contraste.tn}"
+      # Database
       DB_CLIENT: "pg"
       DB_HOST: "postgres"
       DB_PORT: "5432"
-      DB_DATABASE: "directus"
-      DB_USER: "directus"
-      DB_PASSWORD: "${DB_PASSWORD:-contrase123}"
+      DB_DATABASE: "${DB_DATABASE:-directus}"
+      DB_USER: "${DB_USER:-directus}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      # Cache
       CACHE_ENABLED: "true"
       CACHE_STORE: "redis"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       CACHE_TTL: "300000"
+      # Email (désactivé pour l'instant)
       EMAIL_ENABLED: "false"
-      ADMIN_EMAIL: "admin@contraste.tn"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-contrase123}"
-      SECRET: "${DIRECTUS_SECRET:-super-secret-random-string-change-me}"
-      KEY: "${DIRECTUS_KEY:-a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6}"
+      # Admin initial
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@contraste.tn}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+      # Secrets (OBLIGATOIRE de les définir dans .env)
+      SECRET: "${DIRECTUS_SECRET}"
+      KEY: "${DIRECTUS_KEY}"
+      # Fichiers
       STORAGE_LOCATIONS: "local"
       STORAGE_LOCAL_DRIVER: "local"
       STORAGE_LOCAL_ROOT: "/directus/uploads"
@@ -53,27 +71,41 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8055/server/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
     restart: unless-stopped
     networks:
       - app-network
 
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
   postgres:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_USER: "directus"
-      POSTGRES_PASSWORD: "${DB_PASSWORD:-contrase123}"
-      POSTGRES_DB: "directus"
+      POSTGRES_USER: "${DB_USER:-directus}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_DATABASE:-directus}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Pas de port exposé à l'extérieur — interne uniquement
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U directus -d directus"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-directus} -d ${DB_DATABASE:-directus}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
     restart: unless-stopped
     networks:
       - app-network
 
+  # ===========================================
+  # Redis Cache
+  # ===========================================
   redis:
     image: redis:7-alpine
     restart: unless-stopped

@@ -12,7 +12,17 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'www.contraste.tn',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/assets/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.contraste.tn',
+        pathname: '/assets/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'directus.contraste.tn',
+        pathname: '/assets/**',
       },
     ],
   },
