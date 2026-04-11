@@ -208,7 +208,7 @@ export async function getBook(id: number): Promise<Book | null> {
 
 export async function getBookBySlug(slug: string): Promise<Book | null> {
   try {
-    const books = await fetchAPI<Book[]>('books', { filter: `{"slug":{"_eq":"${slug}"}`, fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
+    const books = await fetchAPI<Book[]>('books', { filter: `{"slug":{"_eq":"${slug}"}}`, fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
     if (books.length > 0 || process.env.NODE_ENV === 'production') {
       return books[0] || null;
     }
