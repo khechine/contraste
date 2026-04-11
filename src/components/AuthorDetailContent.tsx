@@ -239,7 +239,10 @@ export default function AuthorDetailContent({ author, locale, authorBooks }: Aut
             className="flex-1"
           >
             <h1 className="text-3xl sm:text-4xl font-serif font-bold mb-6">{author.name}</h1>
-            <p className="text-gray-700 leading-relaxed text-lg mb-8">{bio}</p>
+            <div 
+              className="text-gray-700 leading-relaxed text-lg mb-8"
+              dangerouslySetInnerHTML={{ __html: bio }}
+            />
 
             {/* Statistics */}
             {stats && (

@@ -294,7 +294,7 @@ async function createAuthor(author: AuthorInput): Promise<number | null> {
         slug: slugify(author.name),
         bio: author.bio_fr,
         bio_ar: author.bio_ar,
-        image: image_id,
+        photo: image_id,
       }),
     });
     
