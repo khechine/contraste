@@ -243,7 +243,11 @@ export default function AuthorDetailContent({ author, locale, authorBooks }: Aut
               </select>
               <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="px-5 py-3 rounded-2xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 bg-white transition-all shadow-sm">
                 <option value="all">{lbl.allYears}</option>
-                {years.map(y => <option key={y} value={y.toString()}>{y}</option>)}
+                {years.map(y => (
+                  <option key={y} value={y?.toString() || ''}>
+                    {y}
+                  </option>
+                ))}
               </select>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className="px-5 py-3 rounded-2xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 bg-white transition-all shadow-sm">
                 <option value="recent">{lbl.recentFirst}</option>
