@@ -147,7 +147,7 @@ export async function fetchAPI<T>(endpoint: string, params?: Record<string, stri
 export async function getBooks(limit: number = 500): Promise<Book[]> {
   const books = await fetchAPI<Book[]>('books', {
     limit: String(limit),
-    fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,status',
+    fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar',
     sort: '-id',
   });
   return books || [];
@@ -332,5 +332,7 @@ export function getImageUrl(filename: string | null | undefined | { id: string; 
   if (fn.startsWith('/')) {
     return fn;
   }
-  return `/assets/${fn}`;
+  
+  const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
+  return `${directusUrl}/assets/${fn}`;
 }
