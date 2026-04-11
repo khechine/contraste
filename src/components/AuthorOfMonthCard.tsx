@@ -17,6 +17,8 @@ function AuthorOfMonthCard({ author, locale }: AuthorOfMonthCardProps) {
   const bio = locale === 'en' ? author.bio_en || author.bio : author.bio_ar || author.bio;
   const authorRoute = getAuthorsRoute(locale);
 
+  const authorImage = author.photo || author.image;
+
   // Demo books
   const demoBooks: Book[] = [
     { id: 1, title: "Kairouan et ses saints", slug: 'kairouan-saints', author_name: name, cover_image: null, price_dt: 25, price_eur: 25, title_en: "", title_ar: "", description: "", description_en: "", description_ar: "", author_id: author.id },
@@ -35,16 +37,16 @@ function AuthorOfMonthCard({ author, locale }: AuthorOfMonthCardProps) {
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex-shrink-0">
             <div className="relative w-40 h-56 rounded-2xl overflow-hidden ring-2 ring-gray-200/50 group-hover:ring-sky-300/70">
-              {author.image && (
-                <Image
-                  src={`http://localhost:8055/assets/${author.image}`}
-                  alt={name || "Photo de l'auteur"}
-                  fill
-                  sizes="(max-width: 768px) 160px, 160px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              )}
-              {!author.image && (
+              {authorImage ? (
+                  <Image
+                    src={`/assets/${authorImage}`}
+                    alt={name || "Photo de l'auteur"}
+                    fill
+                    sizes="(max-width: 768px) 160px, 160px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    unoptimized
+                  />
+              ) : (
                 <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-3xl font-serif font-bold text-slate-600">
                   {name.charAt(0).toUpperCase()}
                 </div>
@@ -57,9 +59,10 @@ function AuthorOfMonthCard({ author, locale }: AuthorOfMonthCardProps) {
               <h2 className="text-3xl lg:text-4xl font-serif font-bold text-gray-900 leading-tight group-hover:text-sky-900 mb-3">
                 {name}
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed line-clamp-4 lg:line-clamp-5 pr-4">
-                {bio}
-              </p>
+              <div 
+                className="text-lg text-slate-600 leading-relaxed line-clamp-4 lg:line-clamp-5 pr-4"
+                dangerouslySetInnerHTML={{ __html: bio }}
+              />
             </div>
 
             <div className="pt-6 pb-4 border-t border-gray-200">

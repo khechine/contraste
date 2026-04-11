@@ -2,6 +2,8 @@ import { getFeaturedBooks, getHeroSections, getLatestNews, getLatestBook, getAut
 import { Locale } from '@/lib/i18n';
 import AnimatedHome from '@/components/AnimatedHome';
 
+export const revalidate = 60;
+
 interface PageProps {
   params: Promise<{ lang: string }>;
 }

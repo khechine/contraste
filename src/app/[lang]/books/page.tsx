@@ -2,6 +2,8 @@ import { getBooks } from '@/lib/directus';
 import { Locale } from '@/lib/i18n';
 import AnimatedBooks from '@/components/AnimatedBooks';
 
+export const revalidate = 60; // Revalidate every 60 seconds
+
 interface PageProps {
   params: Promise<{ lang: string }>;
 }

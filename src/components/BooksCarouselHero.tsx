@@ -13,7 +13,7 @@ interface BooksCarouselHeroProps {
   locale: Locale;
   bookLinks: string;
 }
-const GENERIC_BOOK_IMAGE = null;
+
 export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCarouselHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -21,41 +21,21 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
 
   if (!books || books.length === 0) return null;
 
-  const slideVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 1000 : -1000,
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (dir: number) => ({
-      zIndex: 0,
-      x: dir < 0 ? 1000 : -1000,
-      opacity: 0,
-    }),
-  };
-
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
     setCurrentIndex((prevIndex) => (prevIndex + newDirection + books.length) % books.length);
     setIsAutoPlay(false);
   };
 
-  // Auto-play effect
   useEffect(() => {
     if (!isAutoPlay) {
       const timer = setTimeout(() => setIsAutoPlay(true), 10000);
       return () => clearTimeout(timer);
     }
-
     const interval = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prevIndex) => (prevIndex + 1) % books.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, [isAutoPlay, books.length]);
 
@@ -63,7 +43,6 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
   const title = getLocalizedField(currentBook, locale, 'title', 'title_en', 'title_ar');
   const description = getLocalizedField(currentBook, locale, 'description', 'description_en', 'description_ar');
   const coverUrl = getImageUrl(currentBook.cover_image);
-  const heroImage = coverUrl || undefined;
   const authorName = typeof currentBook.author === 'object' && currentBook.author?.name 
     ? currentBook.author.name 
     : currentBook.author_name || '';
@@ -73,55 +52,42 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
     fr: { newBook: 'Nouveau livre', by: 'par', discover: 'Découvrir' },
     en: { newBook: 'New book', by: 'by', discover: 'Discover' },
     ar: { newBook: 'كتاب جديد', by: 'بواسطة', discover: 'اكتشف' },
-  };
-
-  const lbl = labels[locale];
+  }[locale];
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950">
+    <section className="relative min-h-[80vh] md:min-h-screen w-full overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950">
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={currentIndex}
           custom={direction}
-          variants={slideVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            x: { type: 'spring', stiffness: 300, damping: 30 },
-            opacity: { duration: 0.5 },
-          }}
+          initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: direction < 0 ? 300 : -300, opacity: 0 }}
+          transition={{ duration: 0.4 }}
           className="absolute inset-0"
         >
-          {/* Background Image */}
-          <div className="absolute inset-0">
+          {/* Background Blurred Image */}
+          <div className="absolute inset-0 z-0">
             {coverUrl && (
               <Image
                 src={coverUrl}
-                alt={title}
+                alt=""
                 fill
-                className="object-cover blur-md opacity-30"
-                priority
+                className="object-cover blur-xl opacity-20 scale-110"
                 unoptimized
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/70 to-transparent" />
+            <div className="absolute inset-0 bg-slate-950/60" />
           </div>
 
-          {/* Content */}
-          <div className="relative h-full flex items-center px-4 sm:px-6 lg:px-8">
+          <div className="relative h-full flex items-center pt-20 pb-12 px-4 sm:px-6 lg:px-8 z-10">
             <div className="max-w-7xl mx-auto w-full">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                {/* Book Cover - Left */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
-                  className="flex justify-center lg:justify-start"
-                >
-                  <div className="relative w-48 sm:w-56 lg:w-72 aspect-[3/4] rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/20">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                {/* Book Cover */}
+                <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+                  <div className="relative w-40 sm:w-56 lg:w-80 aspect-[3/4] rounded-lg overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform lg:rotate-3 hover:rotate-0 transition-transform duration-500 ring-1 ring-white/10">
                     <Image
-                      src={heroImage || '/images/hero-placeholder.svg'}
+                      src={coverUrl || '/images/hero-placeholder.svg'}
                       alt={title}
                       fill
                       className="object-cover"
@@ -129,117 +95,61 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
                       unoptimized
                     />
                   </div>
-                </motion.div>
+                </div>
 
-                {/* Book Info - Right */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.6 }}
-                  className="text-white lg:text-left"
-                >
-                  <p className="text-sm uppercase tracking-[0.24em] text-blue-400 font-semibold mb-4">
-                    {lbl.newBook}
-                  </p>
-                  
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold mb-4 leading-tight">
-                    {title}
-                  </h1>
+                {/* Info */}
+                <div className="order-2 lg:order-1 text-center lg:text-left space-y-4 sm:space-y-6">
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                    <span className="inline-block px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
+                      {labels.newBook}
+                    </span>
+                    <h1 className="text-3xl sm:text-5xl lg:text-7xl font-serif font-bold text-white mb-4 leading-tight tracking-tight">
+                      {title}
+                    </h1>
+                    {authorName && (
+                      <p className="text-lg sm:text-xl text-slate-300">
+                        {labels.by} <span className="text-white font-medium">{authorName}</span>
+                      </p>
+                    )}
+                  </motion.div>
 
-                  {authorName && (
-                    <p className="text-base sm:text-lg text-slate-300 mb-6">
-                      {lbl.by} <span className="font-semibold text-white">{authorName}</span>
-                    </p>
-                  )}
-
-                  <div 
-                    className="text-base sm:text-lg text-slate-200 leading-relaxed mb-8 max-w-lg line-clamp-3"
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ delay: 0.3 }}
+                    className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 line-clamp-3 md:line-clamp-4"
                     dangerouslySetInnerHTML={{ __html: description }}
                   />
 
-                  {/* Book Meta */}
-                  <div className="flex flex-wrap gap-6 text-sm mb-8">
-                    {currentBook.year && (
-                      <div>
-                        <span className="text-slate-400">{locale === 'fr' ? 'Année' : locale === 'en' ? 'Year' : 'السنة'}</span>
-                        <p className="font-semibold text-white">{currentBook.year}</p>
-                      </div>
-                    )}
-                    {currentBook.category && (
-                      <div>
-                        <span className="text-slate-400">{locale === 'fr' ? 'Catégorie' : locale === 'en' ? 'Category' : 'الفئة'}</span>
-                        <p className="font-semibold text-white">{currentBook.category}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* CTA Button */}
-                  <Link
-                    href={bookUrl}
-                    className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                  >
-                    {lbl.discover} →
-                  </Link>
-                </motion.div>
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="pt-4 sm:pt-6">
+                    <Link
+                      href={bookUrl}
+                      className="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-slate-100 transition-all duration-300 shadow-lg hover:shadow-white/10 active:scale-95 group"
+                    >
+                      {labels.discover}
+                      <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                    </Link>
+                  </motion.div>
+                </div>
               </div>
             </div>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation Buttons */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => paginate(-1)}
-        className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm"
-        aria-label="Previous book"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </motion.button>
-
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => paginate(1)}
-        className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm"
-        aria-label="Next book"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </motion.button>
-
-      {/* Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {books.map((_, index) => (
-          <motion.button
-            key={index}
-            onClick={() => {
-              setDirection(index > currentIndex ? 1 : -1);
-              setCurrentIndex(index);
-              setIsAutoPlay(false);
-            }}
-            className={`h-2 rounded-full transition-all ${
-              index === currentIndex
-                ? 'bg-blue-400 w-8'
-                : 'bg-white/30 w-2 hover:bg-white/50'
-            }`}
-            whileHover={{ scale: 1.2 }}
-            aria-label={`Go to book ${index + 1}`}
-          />
-        ))}
+      {/* Navigation Controls */}
+      <div className="absolute bottom-8 left-4 right-4 sm:left-12 sm:right-auto z-30 flex items-center gap-4">
+        <div className="flex gap-2">
+          {books.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { setDirection(i > currentIndex ? 1 : -1); setCurrentIndex(i); setIsAutoPlay(false); }}
+              className={`h-1.5 transition-all duration-300 rounded-full ${i === currentIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/20 hover:bg-white/40'}`}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
       </div>
-
-      {/* View All Link */}
-      <Link
-        href={bookLinks}
-        className="absolute top-8 right-8 z-20 text-sm font-medium text-white/70 hover:text-white transition-colors flex items-center gap-2"
-      >
-        {locale === 'fr' ? 'Voir tous les livres' : locale === 'en' ? 'View all books' : 'عرض جميع الكتب'} →
-      </Link>
     </section>
   );
 }

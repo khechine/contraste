@@ -1,0 +1,76 @@
+{
+  "collections": [
+    {
+      "collection": "authors",
+      "icon": "person",
+      "description": "Auteurs des livres",
+      "meta": { "sort": 1 }
+    },
+    {
+      "collection": "books",
+      "icon": "menu_book", 
+      "description": "Livres publiés",
+      "meta": { "sort": 2 }
+    },
+    {
+      "collection": "news",
+      "icon": "newspaper",
+      "description": "Actualités",
+      "meta": { "sort": 3 }
+    },
+    {
+      "collection": "hero_sections",
+      "icon": "home",
+      "description": "Sections hero",
+      "meta": { "sort": 4 }
+    }
+  ],
+  "fields": {
+    "authors": [
+      { "field": "name", "type": "string", "required": true },
+      { "field": "slug", "type": "string" },
+      { "field": "bio_fr", "type": "text" },
+      { "field": "bio_en", "type": "text" },
+      { "field": "bio_ar", "type": "text" },
+      { "field": "photo", "type": "image" }
+    ],
+    "books": [
+      { "field": "title", "type": "string", "required": true },
+      { "field": "slug", "type": "string" },
+      { "field": "title_en", "type": "string" },
+      { "field": "title_ar", "type": "string" },
+      { "field": "description", "type": "text" },
+      { "field": "description_en", "type": "text" },
+      { "field": "description_ar", "type": "text" },
+      { "field": "price_dt", "type": "decimal", "precision": 10, "scale": 2 },
+      { "field": "price_eur", "type": "decimal", "precision": 10, "scale": 2 },
+      { "field": "year", "type": "integer" },
+      { "field": "category", "type": "string" },
+      { "field": "language", "type": "string" },
+      { "field": "pages", "type": "integer" },
+      { "field": "isbn", "type": "string" },
+      { "field": "cover", "type": "image" },
+      { "field": "author", "type": "o2m", "collection": "authors", "field": "books" }
+    ],
+    "news": [
+      { "field": "title", "type": "string", "required": true },
+      { "field": "slug", "type": "string" },
+      { "field": "content", "type": "text" },
+      { "field": "content_en", "type": "text" },
+      { "field": "content_ar", "type": "text" },
+      { "field": "image", "type": "image" },
+      { "field": "date", "type": "datetime" }
+    ],
+    "hero_sections": [
+      { "field": "title", "type": "string" },
+      { "field": "title_en", "type": "string" },
+      { "field": "title_ar", "type": "string" },
+      { "field": "subtitle", "type": "string" },
+      { "field": "subtitle_en", "type": "string" },
+      { "field": "subtitle_ar", "type": "string" },
+      { "field": "image", "type": "image" },
+      { "field": "order", "type": "integer" },
+      { "field": "link", "type": "string" }
+    ]
+  }
+}

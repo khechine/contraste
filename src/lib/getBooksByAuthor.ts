@@ -3,12 +3,7 @@ import { fetchAPI } from './directus';
 
 
 export async function getBooksByAuthor(authorId: number, limit = 3): Promise<Book[]> {
-  const books = await fetchAPI<Book[]>('books', { 
-    filter: `{"author_id":{"_eq":${authorId}}}`, 
-    limit: String(limit), 
-    sort: '-date_created',
-    fields: '*,author.*'
-  });
+  const books = await fetchAPI<Book[]>(`books?filter[author_id][_eq]=${authorId}&limit=${limit}&sort=-date_created&fields=id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*`);
   
   if (books.length > 0) return books;
   

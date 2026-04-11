@@ -28,70 +28,50 @@ export default function HeroSectionCard({ section, locale }: HeroSectionCardProp
     return <AuthorOfMonthCardDynamic author={section.author_of_month} locale={locale} />;
   }
 
-  // Generate image if not available
   useEffect(() => {
     if (staticImageUrl || isGenerating) return;
-
-    const generateImage = async () => {
-      setIsGenerating(true);
-      try {
-        // Use local placeholder instead of API call
-        setGeneratedImageUrl(Math.random() > 0.5 ? '/images/books-with-colorful-covers-arrangement.jpg' : '/images/unrecognizable-woman-reading-book-from-stack.jpg');
-
-      } finally {
-        setIsGenerating(false);
-      }
-    };
-
-
-    generateImage();
-  }, [staticImageUrl, title, description, isGenerating, section.type]);
+    setGeneratedImageUrl(Math.random() > 0.5 ? '/images/books-with-colorful-covers-arrangement.jpg' : '/images/unrecognizable-woman-reading-book-from-stack.jpg');
+  }, [staticImageUrl, isGenerating]);
 
   const imageUrl = staticImageUrl || generatedImageUrl;
   const ctaLabel = getLocalizedField(section, locale, 'cta_label', 'cta_label_en', 'cta_label_ar') || section.cta_label || (locale === 'fr' ? 'En savoir plus' : locale === 'en' ? 'Learn more' : 'المزيد');
   const ctaUrl = section.cta_url || '#';
 
   return (
-    <article className="group rounded-3xl overflow-hidden shadow-lg ring-1 ring-black/5 bg-white transition-transform hover:-translate-y-1">
-      <div className="relative h-72 overflow-hidden bg-slate-100">
+    <article className="group rounded-3xl overflow-hidden shadow-lg ring-1 ring-black/5 bg-white transition-all transform hover:-translate-y-1">
+      <div className="relative h-64 sm:h-72 overflow-hidden bg-slate-100">
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={title || "Image de la section hero"}
+            alt={title || "Hero image"}
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             unoptimized
             className="object-cover transition-transform duration-500 group-hover:scale-105"
-            priority={false}
           />
         ) : (
-          <div
-            className="absolute inset-0 flex items-center justify-center opacity-80"
-            style={{ backgroundImage: 'linear-gradient(to bottom right, #0f172a, #334155, #0f172a)' }}
-          >
-            {isGenerating && (
-              <div className="text-white text-center">
-                <div className="animate-spin mb-2">⚙️</div>
-                <p className="text-sm">{locale === 'fr' ? 'Génération...' : locale === 'en' ? 'Generating...' : 'جاري الإنشاء...'}</p>
-              </div>
-            )}
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950" />
         )}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundImage: 'linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent)' }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-300">{section.type || 'Hero'}</p>
-          <h3 className="mt-2 text-2xl font-semibold">{title}</h3>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-blue-300 font-bold mb-1 opacity-90">{section.type || 'Hero'}</p>
+          <h3 className="text-xl sm:text-2xl font-serif font-bold leading-tight">{title}</h3>
         </div>
       </div>
-      <div className="p-6">
-        <p className="text-sm text-slate-600 leading-7 mb-5">{subtitle}</p>
-        <p className="text-sm text-slate-500 line-clamp-3 mb-6">{description}</p>
+      <div className="p-6 sm:p-8">
+        {subtitle && (
+          <div 
+            className="text-sm font-medium text-slate-800 mb-3 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: subtitle }}
+          />
+        )}
+        <div 
+          className="text-sm text-slate-500 line-clamp-3 mb-6 leading-relaxed italic"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
         <Link
           href={ctaUrl}
-          className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+          className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-slate-800 transition-colors active:scale-95"
         >
           {ctaLabel}
         </Link>

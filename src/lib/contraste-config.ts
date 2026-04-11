@@ -1,7 +1,7 @@
 export const CONTRASTE_CONFIG = {
   logo: {
-    retinaSvg: 'https://www.contraste.tn/wp-content/uploads/2025/07/logo_contraste_retina.svg',
-    retinaPng: 'https://www.contraste.tn/wp-content/uploads/2022/02/logo_contraste_bg-retina.png',
+    retinaSvg: '/logo-contraste-retina.svg',
+    retinaPng: '/logo-contraste-retina.svg',
     width: 500,
     height: 350,
   },

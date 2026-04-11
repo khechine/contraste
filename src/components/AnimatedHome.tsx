@@ -206,6 +206,7 @@ export default function AnimatedHome({
                       src={getImageUrl(authorOfMonth.photo || authorOfMonth.image)!}
                       alt={authorOfMonth.name || "Photo de l'auteur"}
                       fill
+                      unoptimized
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover"
                     />
