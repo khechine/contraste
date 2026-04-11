@@ -124,9 +124,10 @@ export default function BookDetailContent({
               </p>
             )}
 
-            <div className="prose prose-lg max-w-none">
-              <p className="text-gray-700 leading-relaxed">{description}</p>
-            </div>
+            <div 
+              className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
 
             <div className="mt-8 pt-8 border-t border-gray-100">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
