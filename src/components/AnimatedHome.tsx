@@ -219,9 +219,10 @@ export default function AnimatedHome({
                 </div>
                 <div className="md:w-2/3 p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
                   <h3 className="text-3xl font-serif font-bold mb-6">{authorOfMonth.name}</h3>
-                  <p className="text-lg text-slate-600 mb-8 line-clamp-4 leading-relaxed">
-                    {getLocalizedField(authorOfMonth as any, locale, 'bio', 'bio_en', 'bio_ar')}
-                  </p>
+                  <div 
+                    className="text-lg text-slate-600 mb-8 line-clamp-4 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: getLocalizedField(authorOfMonth as any, locale, 'bio', 'bio_en', 'bio_ar') }}
+                  />
                   <div>
                     <Link
                       href={`/${locale}/${getAuthorsRoute(locale)}/${authorOfMonth.slug}`}

@@ -13,7 +13,7 @@ interface BooksCarouselHeroProps {
   locale: Locale;
   bookLinks: string;
 }
-const GENERIC_BOOK_IMAGE = 'https://www.contraste.tn/wp-content/uploads/2026/04/hero-latest-books.jpg';
+const GENERIC_BOOK_IMAGE = null;
 export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCarouselHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -62,7 +62,8 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
   const currentBook = books[currentIndex];
   const title = getLocalizedField(currentBook, locale, 'title', 'title_en', 'title_ar');
   const description = getLocalizedField(currentBook, locale, 'description', 'description_en', 'description_ar');
-  const coverUrl = getImageUrl(currentBook.cover_image) || GENERIC_BOOK_IMAGE;
+  const coverUrl = getImageUrl(currentBook.cover_image);
+  const heroImage = coverUrl || undefined;
   const authorName = typeof currentBook.author === 'object' && currentBook.author?.name 
     ? currentBook.author.name 
     : currentBook.author_name || '';
@@ -120,7 +121,7 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
                 >
                   <div className="relative w-48 sm:w-56 lg:w-72 aspect-[3/4] rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/20">
                     <Image
-                      src={coverUrl}
+                      src={heroImage || '/images/hero-placeholder.svg'}
                       alt={title}
                       fill
                       className="object-cover"
@@ -151,9 +152,10 @@ export default function BooksCarouselHero({ books, locale, bookLinks }: BooksCar
                     </p>
                   )}
 
-                  <p className="text-base sm:text-lg text-slate-200 leading-relaxed mb-8 max-w-lg line-clamp-3">
-                    {description}
-                  </p>
+                  <div 
+                    className="text-base sm:text-lg text-slate-200 leading-relaxed mb-8 max-w-lg line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: description }}
+                  />
 
                   {/* Book Meta */}
                   <div className="flex flex-wrap gap-6 text-sm mb-8">

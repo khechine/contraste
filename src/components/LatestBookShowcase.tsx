@@ -84,9 +84,10 @@ export default function LatestBookShowcase({
               </p>
             )}
 
-            <p className="text-base text-slate-600 leading-relaxed mb-6 line-clamp-4">
-              {description}
-            </p>
+            <div 
+              className="text-base text-slate-600 leading-relaxed mb-6 line-clamp-4"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
 
             {/* Book Details */}
             <div className="flex flex-wrap gap-6 text-sm mb-8">
