@@ -48,15 +48,17 @@ export default function LatestBookShowcase({
         {/* Book Cover */}
         <div className="relative h-96 lg:h-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
           {coverUrl ? (
-            <Image
-              src={coverUrl}
-              alt={title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              priority
-            />
-
+            <Link href={bookUrl} className="absolute inset-0 block h-full w-full">
+              <Image
+                src={coverUrl}
+                alt={title}
+                fill
+                unoptimized
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
+                priority
+              />
+            </Link>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
               <svg className="w-24 h-24 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
