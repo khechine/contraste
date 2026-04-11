@@ -11,6 +11,13 @@ export interface Author {
   image: string | null;
   photo?: string | null;
   country?: string;
+  is_author_of_month?: boolean;
+}
+
+export interface DirectusFile {
+  id: string;
+  filename_disk: string;
+  filename_download: string;
 }
 
 export interface Book {
@@ -25,7 +32,7 @@ export interface Book {
   description: string;
   description_en: string;
   description_ar: string;
-  cover_image: string | null;
+  cover_image: string | DirectusFile | null;
   price_dt: number;
   price_eur: number;
   date_published?: string | null;
@@ -34,6 +41,7 @@ export interface Book {
   year?: number;
   language?: string;
   category?: string;
+  is_featured?: boolean;
 }
 
 export interface News {

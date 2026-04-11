@@ -117,6 +117,7 @@ add_field "authors" "bio_en"   "text"    '{"interface":"input-rich-text-html","w
 add_field "authors" "bio_ar"   "text"    '{"interface":"input-rich-text-html","width":"full"}' '{}'
 add_field "authors" "photo"    "uuid"    '{"interface":"file-image","width":"half","display":"image"}' '{}'
 add_field "authors" "country"  "string"  '{"interface":"input","width":"half"}' '{}'
+add_field "authors" "is_author_of_month" "boolean" '{"interface":"boolean","width":"half"}' '{"default_value":false}'
 
 echo "  ✅ Champs authors configurés"
 
@@ -143,6 +144,7 @@ add_field "books" "pages"          "integer" '{"interface":"input","width":"quar
 add_field "books" "isbn"           "string"  '{"interface":"input","width":"half"}' '{}'
 add_field "books" "language"       "string"  '{"interface":"input","width":"half"}' '{}'
 add_field "books" "category"       "string"  '{"interface":"input","width":"full"}' '{}'
+add_field "books" "is_featured"    "boolean" '{"interface":"boolean","width":"half"}' '{"default_value":false}'
 
 echo "  ✅ Champs books configurés"
 

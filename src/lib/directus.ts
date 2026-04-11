@@ -147,21 +147,39 @@ export async function fetchAPI<T>(endpoint: string, params?: Record<string, stri
 export async function getBooks(limit: number = 500): Promise<Book[]> {
   const books = await fetchAPI<Book[]>('books', {
     limit: String(limit),
-    fields: 'id,title,title_en,title_ar,slug,cover_image,price_dt,price_eur,author_name,description,description_en,description_ar,status',
+    fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,status',
     sort: '-id',
   });
   return books || [];
 }
 
 export async function getFeaturedBooks(): Promise<Book[]> {
-  const books = await fetchAPI<Book[]>('books', { limit: '6', sort: '-id' });
-  if (books.length > 0 || process.env.NODE_ENV === 'production') {
-    return books;
+  const fields = 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar';
+  
+  const featuredBooks = await fetchAPI<Book[]>('books', { filter: `{"is_featured":{"_eq":true}}`, sort: '-id', fields }) || [];
+  const latestBooks = await fetchAPI<Book[]>('books', { limit: '6', sort: '-id', fields }) || [];
+  
+  const allBooks = [...featuredBooks];
+  const featuredIds = new Set(featuredBooks.map(b => b.id));
+  
+  for (const book of latestBooks) {
+    if (!featuredIds.has(book.id)) {
+      allBooks.push(book);
+    }
+  }
+
+  if (allBooks.length > 0 || process.env.NODE_ENV === 'production') {
+    return allBooks;
   }
   return getSeedBooks().slice(0, 6);
 }
 
 export async function getAuthorOfTheMonth(): Promise<Author | null> {
+  const featuredAuthors = await fetchAPI<Author[]>('authors', { filter: `{"is_author_of_month":{"_eq":true}}`, limit: '1', sort: '-id' }) || [];
+  if (featuredAuthors.length > 0) {
+    return featuredAuthors[0];
+  }
+
   const authors = await fetchAPI<Author[]>('authors', { limit: '1', sort: '-id' });
   if (authors.length > 0 || process.env.NODE_ENV === 'production') {
     return authors[0] || null;
@@ -174,13 +192,14 @@ export async function getLatestBook(): Promise<Book | null> {
   const books = await fetchAPI<Book[]>('books', {
     limit: '1',
     sort: '-id',
+    fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar',
   });
   return books && books.length > 0 ? books[0] : null;
 }
 
 export async function getBook(id: number): Promise<Book | null> {
   try {
-    const books = await fetchAPI<Book[]>('books', { filter: `{"id":{"_eq":${id}}}` });
+    const books = await fetchAPI<Book[]>('books', { filter: `{"id":{"_eq":${id}}}`, fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
     return books[0] || null;
   } catch {
     return null;
@@ -189,7 +208,7 @@ export async function getBook(id: number): Promise<Book | null> {
 
 export async function getBookBySlug(slug: string): Promise<Book | null> {
   try {
-    const books = await fetchAPI<Book[]>('books', { filter: `{"slug":{"_eq":"${slug}"}}` });
+    const books = await fetchAPI<Book[]>('books', { filter: `{"slug":{"_eq":"${slug}"}`, fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
     if (books.length > 0 || process.env.NODE_ENV === 'production') {
       return books[0] || null;
     }
@@ -296,13 +315,22 @@ export async function getNewsItemBySlug(slug: string): Promise<News | null> {
   }
 }
 
-export function getImageUrl(filename: string | null | undefined): string | null {
+export function getImageUrl(filename: string | null | undefined | { id: string; filename_disk: string }): string | null {
   if (!filename) return null;
-  if (filename.startsWith('http://') || filename.startsWith('https://')) {
-    return filename;
+  
+  // Handle Directus file object (when cover_image.* is requested)
+  if (typeof filename === 'object' && filename !== null && 'id' in filename && 'filename_disk' in filename) {
+    const directusUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
+    return `${directusUrl}/assets/${filename.filename_disk}`;
   }
-  if (filename.startsWith('/')) {
-    return filename; // Return local path directly
+  
+  // Handle string filename
+  const fn = filename as string;
+  if (fn.startsWith('http://') || fn.startsWith('https://')) {
+    return fn;
   }
-  return `${BASE_URL}/assets/${filename}`;
+  if (fn.startsWith('/')) {
+    return fn;
+  }
+  return `/assets/${fn}`;
 }
