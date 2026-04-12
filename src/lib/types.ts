@@ -88,7 +88,19 @@ export interface CollectionFiles {
   };
 }
 
-export type ContentType = 'book' | 'author' | 'news';
+export interface Press {
+  id: number;
+  title: string;
+  media_name: string;
+  publication_date: string;
+  excerpt: string;
+  article_url: string;
+  logo: string | DirectusFile | null;
+  featured: boolean;
+  file_attachment?: string | DirectusFile | null;
+}
+
+export type ContentType = 'book' | 'author' | 'news' | 'press';
 
 export interface LocalizedContent {
   locale: Locale;

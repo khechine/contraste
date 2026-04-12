@@ -1,5 +1,5 @@
 import seedData from './seed-data.json';
-import { Book, Author, HeroSection, News } from './types';
+import { Book, Author, HeroSection, News, Press } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
 
@@ -313,6 +313,14 @@ export async function getNewsItemBySlug(slug: string): Promise<News | null> {
   } catch {
     return null;
   }
+}
+
+export async function getPressItems(): Promise<Press[]> {
+  const press = await fetchAPI<Press[]>('press', {
+    sort: '-publication_date',
+    fields: 'id,title,media_name,publication_date,excerpt,article_url,logo,logo.*,featured,file_attachment,file_attachment.*',
+  });
+  return press || [];
 }
 
 export function getImageUrl(filename: string | null | undefined | { id: string; filename_disk: string }): string | null {
