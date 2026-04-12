@@ -20,7 +20,7 @@ export default function PressListPage() {
             sort: '-publication_date',
             fields: 'id,title,media_name,publication_date,featured'
           }
-        }));
+        })) as any;
         setPress(response.data);
       } catch (error) {
         console.error('Failed to fetch press items:', error);

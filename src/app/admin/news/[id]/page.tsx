@@ -33,7 +33,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
         const response = await adminDirectus.request(() => ({
           path: `/items/news/${id}`,
           method: 'GET'
-        }));
+        })) as any;
         setNews(response.data);
       } catch (err: any) {
         console.error('Failed to fetch news:', err);

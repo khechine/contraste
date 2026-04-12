@@ -21,7 +21,7 @@ export default function NewsListPage() {
             sort: '-date',
             fields: 'id,title,slug,image,date'
           }
-        }));
+        })) as any;
         setNews(response.data);
       } catch (error) {
         console.error('Failed to fetch news:', error);

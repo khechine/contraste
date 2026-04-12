@@ -32,7 +32,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
         const response = await adminDirectus.request(() => ({
           path: `/items/press/${id}`,
           method: 'GET'
-        }));
+        })) as any;
         setPress(response.data);
       } catch (err: any) {
         console.error('Failed to fetch press item:', err);

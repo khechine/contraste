@@ -24,7 +24,7 @@ export default function MediaManagerPage() {
           sort: '-uploaded_on',
           filter: '{"type":{"_starts_with":"image/"}}'
         }
-      }));
+      })) as any;
       setFiles(response.data);
     } catch (error) {
       console.error('Failed to fetch files:', error);

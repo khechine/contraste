@@ -34,7 +34,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
         const response = await adminDirectus.request(() => ({
           path: `/items/authors/${id}`,
           method: 'GET'
-        }));
+        })) as any;
         setAuthor(response.data);
       } catch (err: any) {
         console.error('Failed to fetch author:', err);

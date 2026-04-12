@@ -21,7 +21,7 @@ export default function AuthorsListPage() {
             sort: 'name',
             fields: 'id,name,slug,photo'
           }
-        }));
+        })) as any;
         setAuthors(response.data);
       } catch (error) {
         console.error('Failed to fetch authors:', error);

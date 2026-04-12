@@ -44,14 +44,14 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
           path: '/items/authors',
           method: 'GET',
           params: { sort: 'name', fields: 'id,name' }
-        }));
+        })) as any;
         setAuthors(authorsRes.data);
 
         if (!isNew) {
           const bookRes = await adminDirectus.request(() => ({
             path: `/items/books/${id}`,
             method: 'GET'
-          }));
+          })) as any;
           setBook(bookRes.data);
         }
       } catch (err: any) {

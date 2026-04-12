@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
           adminDirectus.request(() => ({ path: '/items/authors?aggregate[count]=*', method: 'GET' })),
           adminDirectus.request(() => ({ path: '/items/news?aggregate[count]=*', method: 'GET' })),
           adminDirectus.request(() => ({ path: '/items/press?aggregate[count]=*', method: 'GET' })),
-        ]);
+        ]) as any[];
 
         setStats({
           books: parseInt(books.data[0].count) || 0,

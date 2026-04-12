@@ -21,7 +21,7 @@ export default function BooksListPage() {
             sort: '-id',
             fields: 'id,title,slug,cover_image,author_name,category,price_dt'
           }
-        }));
+        })) as any;
         setBooks(response.data);
       } catch (error) {
         console.error('Failed to fetch books:', error);
