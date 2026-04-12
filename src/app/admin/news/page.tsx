@@ -22,7 +22,7 @@ export default function NewsListPage() {
             fields: 'id,title,slug,image,date'
           }
         })) as any;
-        setNews(response.data);
+        setNews(response.data || response || []);
       } catch (error) {
         console.error('Failed to fetch news:', error);
       } finally {

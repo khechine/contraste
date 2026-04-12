@@ -23,11 +23,20 @@ export default function AdminDashboardPage() {
           adminDirectus.request(() => ({ path: '/items/press?aggregate[count]=*', method: 'GET' })),
         ]) as any[];
 
+        const getCount = (res: any) => {
+          if (!res) return 0;
+          const data = res.data || res; // Handle both {data: [...]} and [...]
+          if (Array.isArray(data) && data.length > 0) {
+            return parseInt(data[0].count) || 0;
+          }
+          return 0;
+        };
+
         setStats({
-          books: parseInt(books.data[0].count) || 0,
-          authors: parseInt(authors.data[0].count) || 0,
-          news: parseInt(news.data[0].count) || 0,
-          press: parseInt(press.data[0].count) || 0,
+          books: getCount(books),
+          authors: getCount(authors),
+          news: getCount(news),
+          press: getCount(press),
         });
       } catch (error) {
         console.error('Failed to fetch dashboard stats:', error);

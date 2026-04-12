@@ -22,7 +22,7 @@ export default function BooksListPage() {
             fields: 'id,title,slug,cover_image,author_name,category,price_dt'
           }
         })) as any;
-        setBooks(response.data);
+        setBooks(response.data || response || []);
       } catch (error) {
         console.error('Failed to fetch books:', error);
       } finally {

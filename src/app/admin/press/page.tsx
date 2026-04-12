@@ -21,7 +21,7 @@ export default function PressListPage() {
             fields: 'id,title,media_name,publication_date,featured'
           }
         })) as any;
-        setPress(response.data);
+        setPress(response.data || response || []);
       } catch (error) {
         console.error('Failed to fetch press items:', error);
       } finally {

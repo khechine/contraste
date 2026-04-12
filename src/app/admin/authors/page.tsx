@@ -22,7 +22,7 @@ export default function AuthorsListPage() {
             fields: 'id,name,slug,photo'
           }
         })) as any;
-        setAuthors(response.data);
+        setAuthors(response.data || response || []);
       } catch (error) {
         console.error('Failed to fetch authors:', error);
       } finally {
