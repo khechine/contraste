@@ -1,4 +1,6 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { Press } from './types';
 
 // Load environment variables
@@ -50,41 +52,92 @@ async function directusFetch(endpoint: string, init?: RequestInit): Promise<any>
   return response.json();
 }
 
+async function uploadFile(filePath: string): Promise<string | null> {
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+  if (!fs.existsSync(absolutePath)) {
+    console.warn(`! File not found: ${absolutePath}`);
+    return null;
+  }
+
+  console.log(`Uploading file: ${path.basename(absolutePath)}...`);
+  const stats = fs.statSync(absolutePath);
+  const formData = new FormData();
+  
+  const blob = new Blob([fs.readFileSync(absolutePath)]);
+  formData.append('file', blob, path.basename(absolutePath));
+
+  try {
+    const response = await fetch(`${BASE_URL}/files`, {
+      method: 'POST',
+      headers: TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {},
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('✗ Upload failed:', error);
+      return null;
+    }
+
+    const json = await response.json();
+    console.log(`✓ File uploaded: ${json.data.id}`);
+    return json.data.id;
+  } catch (error) {
+    console.error('✗ Upload error:', error);
+    return null;
+  }
+}
+
+async function ensureRelationship(field: string) {
+  try {
+    await directusFetch(`relations/press/${field}`);
+    // console.log(`✓ Relationship for press.${field} exists.`);
+  } catch (e) {
+    console.log(`Creating relationship for "press.${field}"...`);
+    await directusFetch('relations', {
+      method: 'POST',
+      body: JSON.stringify({
+        collection: 'press',
+        field: field,
+        related_collection: 'directus_files',
+        schema: { on_delete: 'SET NULL' },
+        meta: { interface: 'file', display: 'file' }
+      })
+    });
+  }
+}
+
 async function ensurePressCollection() {
   console.log('--- Ensuring "press" collection schema ---');
   
   try {
-    // Check if collection exists
-    await directusFetch(`collections/press`);
-    console.log('✓ Collection "press" already exists.');
+    await directusFetch('collections/press');
+    console.log('✓ Collection "press" exists.');
   } catch (e) {
     console.log('Creating collection "press"...');
     await directusFetch('collections', {
       method: 'POST',
       body: JSON.stringify({
         collection: 'press',
-        schema: {},
         meta: { icon: 'newspaper', note: 'Press coverage and awards' }
       })
     });
   }
 
-  // Define fields
   const fields = [
     { field: 'title', type: 'string', meta: { display: 'text' } },
     { field: 'media_name', type: 'string', meta: { display: 'text' } },
     { field: 'publication_date', type: 'date', meta: { display: 'datetime' } },
     { field: 'excerpt', type: 'text', meta: { display: 'text-multiline' } },
     { field: 'article_url', type: 'string', meta: { display: 'text' } },
-    { field: 'logo', type: 'uuid', meta: { display: 'file' } },
-    { field: 'file_attachment', type: 'uuid', meta: { display: 'file' } },
+    { field: 'logo', type: 'uuid', meta: { display: 'file', interface: 'file' } },
+    { field: 'file_attachment', type: 'uuid', meta: { display: 'file', interface: 'file' } },
     { field: 'featured', type: 'boolean', meta: { display: 'boolean' } },
   ];
 
   for (const field of fields) {
     try {
       await directusFetch(`fields/press/${field.field}`);
-      // console.log(`✓ Field ${field.field} exists.`);
     } catch (e) {
       console.log(`Creating field "${field.field}"...`);
       await directusFetch('fields/press', {
@@ -93,15 +146,18 @@ async function ensurePressCollection() {
       });
     }
   }
+
+  // Set relationships for file fields
+  await ensureRelationship('logo');
+  await ensureRelationship('file_attachment');
 }
 
-async function grantPublicReadAccess() {
-  console.log('\n--- Granting public read access to "press" collection ---');
+async function grantPublicAccess(collection: string) {
+  console.log(`--- Granting public read access to "${collection}" collection ---`);
   try {
-    // Check if permission already exists
-    const existing = await directusFetch('permissions?filter[collection][_eq]=press&filter[role][_null]=true');
+    const existing = await directusFetch(`permissions?filter[collection][_eq]=${collection}&filter[role][_null]=true`);
     if (existing.data && existing.data.length > 0) {
-      console.log('✓ Public read access already granted.');
+      console.log(`✓ Public read access to "${collection}" already granted.`);
       return;
     }
 
@@ -109,44 +165,65 @@ async function grantPublicReadAccess() {
       method: 'POST',
       body: JSON.stringify({
         role: null,
-        collection: 'press',
+        collection: collection,
         action: 'read',
         permissions: {},
         validation: {},
         fields: ['*']
       })
     });
-    console.log('✓ Public read access granted!');
+    console.log(`✓ Public read access to "${collection}" granted!`);
   } catch (e: any) {
-    console.error(`✗ Failed to grant public access: ${e.message}`);
+    console.error(`✗ Failed to grant public access to "${collection}": ${e.message}`);
   }
 }
 
 async function seedPress() {
   await ensurePressCollection();
-  await grantPublicReadAccess();
+  await grantPublicAccess('press');
+  await grantPublicAccess('directus_files');
 
   console.log('\n--- Seeding press items ---');
   for (const item of pressItems) {
     try {
-      // Simple check to avoid duplicates based on title
-      const existing = await directusFetch(`items/press?filter[title][_eq]=${encodeURIComponent(item.title)}`);
-      if (existing.data && existing.data.length > 0) {
+      const existingResponse = await directusFetch(`items/press?filter[title][_eq]=${encodeURIComponent(item.title)}`);
+      if (existingResponse.data && existingResponse.data.length > 0) {
         console.log(`! Item already exists: ${item.title}`);
+        
+        // If it's the Kapitalis item and doesn't have a PDF, let's update it
+        if (item.media_name === 'Kapitalis') {
+          const currentItem = existingResponse.data[0];
+          if (!currentItem.file_attachment) {
+            console.log('Attempting to attach PDF to Kapitalis item...');
+            const fileId = await uploadFile('public/Document 144.pdf');
+            if (fileId) {
+              await directusFetch(`items/press/${currentItem.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ file_attachment: fileId })
+              });
+              console.log('✓ PDF attached and item updated.');
+            }
+          }
+        }
         continue;
+      }
+
+      let fileId = null;
+      if (item.media_name === 'Kapitalis') {
+        fileId = await uploadFile('public/Document 144.pdf');
       }
 
       await directusFetch('items/press', {
         method: 'POST',
-        body: JSON.stringify(item)
+        body: JSON.stringify({ ...item, file_attachment: fileId })
       });
       console.log(`✓ Created: ${item.title}`);
     } catch (e: any) {
-      console.error(`✗ Failed to create ${item.title}: ${e.message}`);
+      console.error(`✗ Failed to process ${item.title}: ${e.message}`);
     }
   }
 }
 
 seedPress()
-  .then(() => console.log('\n✨ Database seeding complete!'))
-  .catch((err) => console.error('\n💥 Seeding failed:', err));
+  .then(() => console.log('\n✨ Database maintenance and seeding complete!'))
+  .catch((err) => console.error('\n💥 Operation failed:', err));
