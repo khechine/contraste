@@ -124,7 +124,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
             ← Catalogue de livres
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isNew ? 'Ajouter un livre' : `Modifier ${book.title}`}
+            {isNew ? 'Ajouter un livre' : `Modifier ${book?.title || ''}`}
           </h1>
         </div>
       </header>
@@ -147,7 +147,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
                 type="text"
                 name="title"
                 required
-                value={book.title || ''}
+                value={book?.title || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -171,7 +171,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <input
                 type="text"
                 name="title_en"
-                value={book.title_en || ''}
+                value={book?.title_en || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -181,7 +181,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <input
                 type="text"
                 name="title_ar"
-                value={book.title_ar || ''}
+                value={book?.title_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"

@@ -117,7 +117,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
               type="text"
               name="title"
               required
-              value={press.title || ''}
+              value={press?.title || ''}
               onChange={handleChange}
               className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-bold"
             />

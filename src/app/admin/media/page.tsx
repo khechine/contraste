@@ -122,7 +122,7 @@ export default function MediaManagerPage() {
               >
                 <img 
                   src={getImageUrl(file.id) || '/placeholder.png'} 
-                  alt={file.title}
+                  alt={file?.title || 'Fichier'}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 
@@ -148,7 +148,7 @@ export default function MediaManagerPage() {
                 </div>
                 
                 <div className="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform">
-                  <p className="text-[10px] text-white font-medium truncate">{file.title || file.filename_download}</p>
+                  <p className="text-[10px] text-white font-medium truncate">{file?.title || file?.filename_download || 'Sans titre'}</p>
                 </div>
               </motion.div>
             ))

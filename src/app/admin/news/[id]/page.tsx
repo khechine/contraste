@@ -116,7 +116,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
                 type="text"
                 name="title"
                 required
-                value={news.title || ''}
+                value={news?.title || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-bold text-lg"
               />
@@ -166,7 +166,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
                 <input
                   type="text"
                   name="title_en"
-                  value={news.title_en || ''}
+                  value={news?.title_en || ''}
                   onChange={handleChange}
                   className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
                 />
@@ -176,7 +176,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
                 <input
                   type="text"
                   name="title_ar"
-                  value={news.title_ar || ''}
+                  value={news?.title_ar || ''}
                   onChange={handleChange}
                   dir="rtl"
                   className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"

@@ -184,7 +184,7 @@ export default function HeroAdminPanel() {
                   <div className="flex flex-col gap-3">
                     <div>
                       <p className="text-xs sm:text-sm text-slate-500">ID {hero.id} · {hero.type || 'general'}</p>
-                      <h3 className="font-medium mt-1 text-sm sm:text-base">{hero.title || hero.title_en || hero.title_ar || 'Sans titre'}</h3>
+                      <h3 className="font-medium mt-1 text-sm sm:text-base">{hero?.title || hero?.title_en || hero?.title_ar || 'Sans titre'}</h3>
                       <p className="text-xs sm:text-sm text-slate-500 mt-1">{hero.cta_url || 'Pas de lien'} · ordre {hero.order ?? 0}</p>
                     </div>
                     <div className="flex gap-2">
