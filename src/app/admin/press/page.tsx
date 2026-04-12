@@ -78,7 +78,7 @@ export default function PressListPage() {
                     </tr>
                   ))
                 ) : (
-                  press.map((item, index) => (
+                  (press || []).map((item, index) => (
                     <motion.tr 
                       key={item.id}
                       initial={{ opacity: 0, y: 10 }}
