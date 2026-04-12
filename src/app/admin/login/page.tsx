@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      await adminDirectus.login(email, password);
+      await adminDirectus.login({ email, password } as any);
       router.push('/admin');
     } catch (err: any) {
       console.error('Login failed:', err);
