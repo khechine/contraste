@@ -3,6 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import { useAuth } from '../src/context/AuthContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { useColorScheme } from '../hooks/use-color-scheme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -74,12 +75,14 @@ export default function LoginScreen() {
             secureTextEntry={!showPassword}
             autoComplete="password"
             style={styles.input}
-            outlineColor={Colors.light.border}
-            activeOutlineColor={Colors.light.tint}
+            outlineColor={colors.border}
+            activeOutlineColor={colors.tint}
+            textColor={colors.text}
             right={
               <TextInput.Icon
                 icon={showPassword ? "eye-off" : "eye"}
                 onPress={() => setShowPassword(!showPassword)}
+                color={colors.textSecondary}
               />
             }
           />

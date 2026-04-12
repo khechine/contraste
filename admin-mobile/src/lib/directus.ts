@@ -30,11 +30,8 @@ const storageAdapter = {
 };
 
 // Création du client avec persistance
-// On utilise l'adaptateur seulement pour le mobile (SecureStore)
-// Sur Web, on laisse le SDK utiliser son implémentation par défaut (localStorage)
-const authConfig = Platform.OS === 'web' 
-  ? authentication('json') 
-  : authentication('json', { storage: storageAdapter as any });
+// On utilise l'adaptateur pour toutes les plateformes (LocalStorage sur Web, SecureStore sur Mobile)
+const authConfig = authentication('json', { storage: storageAdapter as any });
 
 export const directus = createDirectus(DIRECTUS_URL)
   .with(rest())

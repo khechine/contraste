@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, View, RefreshControl, Platform } from 'react-nati
 import { Text, Card, FAB, ActivityIndicator, IconButton, Searchbar, Chip } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../src/context/AuthContext';
 import { directus } from '../../src/lib/directus';
 import { readItems } from '@directus/sdk';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
@@ -11,6 +12,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function BooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
+  const { getAssetUrl } = useAuth();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
@@ -37,7 +39,7 @@ export default function BooksScreen() {
   const renderItem = ({ item }: { item: any }) => (
     <Card style={styles.card} mode="elevated" onPress={() => router.push({ pathname: '/edit-book', params: { id: item.id } })}>
       {item.cover_image ? (
-        <Card.Cover source={{ uri: `${directus.url}/assets/${item.cover_image}?width=300&height=200&fit=cover` }} style={styles.cover} />
+        <Card.Cover source={{ uri: getAssetUrl(item.cover_image, { width: 300, height: 200, fit: 'cover' }) || '' }} style={styles.cover} />
       ) : (
         <View style={[styles.cover, styles.noCover]}>
           <IconButton icon="book-cover-variant" size={40} iconColor="#ccc" />

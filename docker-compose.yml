@@ -34,7 +34,7 @@ services:
       DIRECTUS_ENV: "production"
       DIRECTUS_LOG_LEVEL: "info"
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "https://www.contraste.tn,http://localhost:8081,http://localhost:19006"
+      CORS_ORIGIN: "true"
       CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
       CORS_METHODS: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
       CORS_EXPOSE_HEADERS: "Content-Range"

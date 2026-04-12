@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, View, RefreshControl, Platform } from 'react-nati
 import { Text, List, FAB, ActivityIndicator, Searchbar, Avatar, IconButton } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../src/context/AuthContext';
 import { directus, DIRECTUS_URL } from '../../src/lib/directus';
 import { readItems } from '@directus/sdk';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
@@ -11,10 +12,30 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function AuthorsScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
+  const { getAssetUrl } = useAuth();
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
+
+  const { data: authors, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ['authors'],
+    queryFn: async () => {
+      const data = await directus.request(readItems('authors', {
+        fields: ['id', 'name', 'image'],
+        sort: ['-id'],
+      }));
+      const unique = data.filter((item: any, index: number, self: any[]) => 
+        index === self.findIndex((t: any) => t.id === item.id)
+      );
+      return unique;
+    },
+    staleTime: 0,
+  });
+
+  const filteredAuthors = authors?.filter((author: any) => 
+    author.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const renderItem = ({ item }: { item: any }) => (
     <List.Item
@@ -23,7 +44,7 @@ export default function AuthorsScreen() {
       left={() => (
         <Avatar.Image 
           size={52} 
-          source={item.image ? { uri: getImageUrl(item.image) } : require('../../assets/images/favicon.png')} 
+          source={item.image ? { uri: getAssetUrl(item.image, { width: 104, height: 104, fit: 'cover' }) || '' } : require('../../assets/images/favicon.png')} 
           style={{ borderRadius: 12, marginLeft: 4 }}
         />
       )}

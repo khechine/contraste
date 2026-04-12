@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-nat
 import { TextInput, Button, Text, SegmentedButtons, ActivityIndicator, Portal, Dialog, List, IconButton, Divider } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../src/context/AuthContext';
 import { directus, DIRECTUS_URL } from '../src/lib/directus';
 import { updateItem, createItem, readItem, readItems } from '@directus/sdk';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
@@ -13,6 +14,7 @@ import ImageSelector from '../src/components/ImageSelector';
 export default function EditBookScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
+  const { getAssetUrl } = useAuth();
   const queryClient = useQueryClient();
   const isEditing = !!id;
   const colorScheme = useColorScheme();
@@ -84,7 +86,7 @@ export default function EditBookScreen() {
         cover_image: data.cover_image || null,
       });
       if (data.cover_image) {
-        setImage(`${DIRECTUS_URL}/assets/${data.cover_image}`);
+        setImage(getAssetUrl(data.cover_image));
       }
       return data;
     },
