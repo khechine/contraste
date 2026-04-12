@@ -33,8 +33,8 @@ export default function NewsListPage() {
     fetchNews();
   }, []);
 
-  const filteredNews = news.filter(item => 
-    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredNews = (news || []).filter(item => 
+    item.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

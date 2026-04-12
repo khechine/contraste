@@ -33,8 +33,8 @@ export default function AuthorsListPage() {
     fetchAuthors();
   }, []);
 
-  const filteredAuthors = authors.filter(author => 
-    author.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAuthors = (authors || []).filter(author => 
+    author.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

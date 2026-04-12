@@ -33,8 +33,8 @@ export default function BooksListPage() {
     fetchBooks();
   }, []);
 
-  const filteredBooks = books.filter(book => 
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredBooks = (books || []).filter(book => 
+    book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     book.author_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

@@ -75,7 +75,7 @@ export default function MediaManagerPage() {
         path: `/files/${id}`,
         method: 'DELETE'
       }));
-      setFiles(files.filter(f => f.id !== id));
+      setFiles((files || []).filter(f => f.id !== id));
     } catch (error) {
       console.error('Delete failed:', error);
       alert('Erreur lors de la suppression.');
