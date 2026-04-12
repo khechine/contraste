@@ -95,8 +95,36 @@ async function ensurePressCollection() {
   }
 }
 
+async function grantPublicReadAccess() {
+  console.log('\n--- Granting public read access to "press" collection ---');
+  try {
+    // Check if permission already exists
+    const existing = await directusFetch('permissions?filter[collection][_eq]=press&filter[role][_null]=true');
+    if (existing.data && existing.data.length > 0) {
+      console.log('✓ Public read access already granted.');
+      return;
+    }
+
+    await directusFetch('permissions', {
+      method: 'POST',
+      body: JSON.stringify({
+        role: null,
+        collection: 'press',
+        action: 'read',
+        permissions: {},
+        validation: {},
+        fields: ['*']
+      })
+    });
+    console.log('✓ Public read access granted!');
+  } catch (e: any) {
+    console.error(`✗ Failed to grant public access: ${e.message}`);
+  }
+}
+
 async function seedPress() {
   await ensurePressCollection();
+  await grantPublicReadAccess();
 
   console.log('\n--- Seeding press items ---');
   for (const item of pressItems) {
