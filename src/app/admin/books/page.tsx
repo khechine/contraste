@@ -116,10 +116,10 @@ export default function BooksListPage() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4 text-balanced">
                           <div className="w-14 h-20 rounded-xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {book.cover_image ? (
+                            {book?.cover_image ? (
                               <img 
                                 src={getImageUrl(book.cover_image) || '/placeholder-book.png'} 
-                                alt={book.title}
+                                alt={book?.title || 'Livre'}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
@@ -129,10 +129,10 @@ export default function BooksListPage() {
                             )}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <Link href={`/admin/books/${book.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
-                              {book.title}
+                            <Link href={`/admin/books/${book?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
+                              {book?.title}
                             </Link>
-                            <span className="text-sm text-gray-400 font-medium line-clamp-1">{book.author_name}</span>
+                            <span className="text-sm text-gray-400 font-medium line-clamp-1">{book?.author_name}</span>
                           </div>
                         </div>
                       </td>

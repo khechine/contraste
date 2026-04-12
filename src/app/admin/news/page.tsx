@@ -108,10 +108,10 @@ export default function NewsListPage() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-14 rounded-xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {item.image ? (
+                            {item?.image ? (
                               <img 
                                 src={getImageUrl(item.image) || '/placeholder-news.png'} 
-                                alt={item.title}
+                                alt={item?.title || 'Article'}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
@@ -120,8 +120,8 @@ export default function NewsListPage() {
                               </div>
                             )}
                           </div>
-                          <Link href={`/admin/news/${item.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-2 max-w-md">
-                            {item.title}
+                          <Link href={`/admin/news/${item?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-2 max-w-md">
+                            {item?.title}
                           </Link>
                         </div>
                       </td>

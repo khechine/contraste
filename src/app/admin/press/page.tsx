@@ -88,19 +88,19 @@ export default function PressListPage() {
                     >
                       <td className="px-8 py-6">
                         <div className="flex flex-col min-w-0">
-                          <Link href={`/admin/press/${item.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1 mb-1">
-                            {item.title}
+                          <Link href={`/admin/press/${item?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1 mb-1">
+                            {item?.title}
                           </Link>
-                          <span className="text-sm text-gray-400 font-bold">{item.media_name}</span>
+                          <span className="text-sm text-gray-400 font-bold">{item?.media_name}</span>
                         </div>
                       </td>
                       <td className="px-8 py-6 hidden md:table-cell">
                         <span className="text-sm text-gray-400 font-medium">
-                          {item.publication_date ? new Date(item.publication_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}
+                          {item?.publication_date ? new Date(item.publication_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}
                         </span>
                       </td>
                       <td className="px-8 py-6 hidden lg:table-cell">
-                        {item.featured ? (
+                        {item?.featured ? (
                           <span className="text-[10px] font-black uppercase tracking-wider text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full border border-teal-100">
                              ⭐ Vedette
                           </span>
