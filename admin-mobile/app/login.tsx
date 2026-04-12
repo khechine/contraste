@@ -11,6 +11,9 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = Colors[isDark ? "dark" : "light"];
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -33,22 +36,22 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: Colors.light.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <View style={styles.content}>
         <View style={styles.logoSection}>
-          <View style={[styles.logoCircle, { backgroundColor: Colors.light.tint }]}>
+          <View style={[styles.logoCircle, { backgroundColor: colors.tint }]}>
             <Text style={styles.logoLetter}>C</Text>
           </View>
-          <Text style={[styles.title, { color: Colors.light.text }]}>
+          <Text style={[styles.title, { color: colors.text }]}>
             Contraste Éditions
           </Text>
-          <Text style={[styles.subtitle, { color: Colors.light.textSecondary }]}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Espace Administrateur
           </Text>
         </View>
 
-        <View style={[styles.formContainer, { backgroundColor: Colors.light.surface }]}>
+        <View style={[styles.formContainer, { backgroundColor: colors.surface }]}>
           <TextInput
             label="Email"
             value={email}
@@ -58,8 +61,9 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoComplete="email"
             style={styles.input}
-            outlineColor={Colors.light.border}
-            activeOutlineColor={Colors.light.tint}
+            outlineColor={colors.border}
+            activeOutlineColor={colors.tint}
+            textColor={colors.text}
           />
 
           <TextInput
@@ -91,7 +95,7 @@ export default function LoginScreen() {
             onPress={handleLogin}
             loading={loading}
             disabled={loading}
-            style={[styles.button, { backgroundColor: Colors.light.tint }]}
+            style={[styles.button, { backgroundColor: colors.tint }]}
             contentStyle={styles.buttonContent}
             labelStyle={styles.buttonLabel}
           >
@@ -99,7 +103,7 @@ export default function LoginScreen() {
           </Button>
         </View>
 
-        <Text style={[styles.footer, { color: Colors.light.textTertiary }]}>
+        <Text style={[styles.footer, { color: colors.textTertiary }]}>
           © 2026 Contraste Éditions
         </Text>
       </View>

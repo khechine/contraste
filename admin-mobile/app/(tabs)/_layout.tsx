@@ -78,6 +78,14 @@ export default function TabLayout() {
           headerTitle: 'Actualités',
         }}
       />
+      <Tabs.Screen
+        name="press"
+        options={{
+          title: 'Presse',
+          tabBarIcon: ({ color }) => <IconSymbol size={24} name="megaphone.fill" color={color} />,
+          headerTitle: 'Articles de Presse',
+        }}
+      />
     </Tabs>
   );
 }

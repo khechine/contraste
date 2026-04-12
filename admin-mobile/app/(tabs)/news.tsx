@@ -12,33 +12,13 @@ export default function NewsScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
 
-  const { data: newsItems, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ['news', 'list'],
-    queryFn: async () => {
-      const data = await directus.request(readItems('news', {
-        fields: ['id', 'title', 'date', 'status', 'image'],
-        sort: ['-date'],
-      }));
-      const unique = data.filter((item: any, index: number, self: any[]) => 
-        index === self.findIndex((t: any) => t.id === item.id)
-      );
-      return unique;
-    },
-    staleTime: 0,
-  });
-
-  const filteredNews = newsItems?.filter((item: any) => 
-    item.title ? item.title.toLowerCase().includes(searchQuery.toLowerCase()) : false
-  );
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('fr-FR');
-  };
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = Colors[isDark ? 'dark' : 'light'];
 
   const renderItem = ({ item }: { item: any }) => (
     <Card 
-      style={styles.card} 
+      style={[styles.card, { backgroundColor: colors.surface }]} 
       mode="elevated" 
       onPress={() => router.push({ pathname: '/edit-news', params: { id: item.id } })}
     >
@@ -50,13 +30,13 @@ export default function NewsScreen() {
             style={{ borderRadius: 12 }}
           />
         ) : (
-          <Avatar.Icon size={64} icon="newspaper" style={{ borderRadius: 12, backgroundColor: '#f5f5f5' }} />
+          <Avatar.Icon size={64} icon="newspaper" style={{ borderRadius: 12, backgroundColor: colors.input }} />
         )}
         <View style={{ flex: 1 }}>
-          <Text variant="titleMedium" numberOfLines={2} style={styles.title}>
+          <Text variant="titleMedium" numberOfLines={2} style={[styles.title, { color: colors.text }]}>
             {item.title}
           </Text>
-          <Text variant="bodySmall" style={styles.date}>
+          <Text variant="bodySmall" style={[styles.date, { color: colors.textSecondary }]}>
             {formatDate(item.date)}
           </Text>
           <Chip 
@@ -79,25 +59,25 @@ export default function NewsScreen() {
           icon="pencil" 
           size={22} 
           onPress={() => router.push({ pathname: '/edit-news', params: { id: item.id } })} 
-          style={{ backgroundColor: '#f5f5f5', borderRadius: 12 }}
+          style={{ backgroundColor: colors.input, borderRadius: 12 }}
         />
       </Card.Content>
     </Card>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Searchbar
         placeholder="Chercher une actualité..."
         onChangeText={setSearchQuery}
         value={searchQuery}
-        style={styles.searchbar}
+        style={[styles.searchbar, { backgroundColor: colors.surface }]}
         elevation={0}
       />
       
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.tint} />
         </View>
       ) : (
         <FlatList
@@ -106,19 +86,20 @@ export default function NewsScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.tint} />
           }
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Aucune actualité trouvée</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Aucune actualité trouvée</Text>
           }
         />
       )}
 
       <FAB
         icon="plus"
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.tint }]}
         onPress={() => router.push('/edit-news')}
         label="Nouveau"
+        color="#fff"
       />
     </View>
   );
@@ -127,7 +108,6 @@ export default function NewsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
   },
   centered: {
     flex: 1,
@@ -139,7 +119,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     marginBottom: Spacing.sm,
     elevation: 0,
-    backgroundColor: Colors.light.surface,
     borderRadius: BorderRadius.md,
   },
   listContent: {
@@ -150,15 +129,8 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: Spacing.md,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.light.surface,
     overflow: 'hidden',
     ...Shadows.medium,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 12,
   },
   title: {
     flex: 1,
@@ -166,7 +138,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   date: {
-    color: Colors.light.textSecondary,
     marginTop: 4,
     fontSize: 13,
   },
@@ -176,13 +147,11 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.light.tint,
     ...Shadows.large,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: Spacing.xxxl,
-    color: Colors.light.textSecondary,
     fontSize: 16,
   },
 });

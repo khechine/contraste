@@ -73,18 +73,18 @@ export default function BooksScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Searchbar
         placeholder="Rechercher un livre..."
         onChangeText={setSearchQuery}
         value={searchQuery}
-        style={styles.searchbar}
+        style={[styles.searchbar, { backgroundColor: colors.surface }]}
         elevation={0}
       />
       
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.tint} />
         </View>
       ) : (
         <FlatList
@@ -93,19 +93,20 @@ export default function BooksScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.tint} />
           }
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Aucun livre trouvé</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Aucun livre trouvé</Text>
           }
         />
       )}
 
       <FAB
         icon="plus"
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.tint }]}
         onPress={() => router.push('/edit-book')}
         label="Ajouter"
+        color="#fff"
       />
     </View>
   );
@@ -114,7 +115,6 @@ export default function BooksScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
   },
   centered: {
     flex: 1,
@@ -126,7 +126,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     marginBottom: Spacing.sm,
     elevation: 0,
-    backgroundColor: Colors.light.surface,
     borderRadius: BorderRadius.md,
   },
   listContent: {
@@ -137,7 +136,6 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: Spacing.md,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.light.surface,
     overflow: 'hidden',
     ...Shadows.medium,
   },
@@ -156,13 +154,11 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.light.tint,
     ...Shadows.large,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: Spacing.xxxl,
-    color: Colors.light.textSecondary,
     fontSize: 16,
   },
 });

@@ -12,34 +12,14 @@ export default function AuthorsScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
 
-  const { data: authors, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ['authors'],
-    queryFn: async () => {
-      const data = await directus.request(readItems('authors', {
-        fields: ['id', 'name', 'image'],
-        sort: ['-id'],
-      }));
-      const unique = data.filter((item: any, index: number, self: any[]) => 
-        index === self.findIndex((t: any) => t.id === item.id)
-      );
-      return unique;
-    },
-    staleTime: 0,
-  });
-
-  const filteredAuthors = authors?.filter((author: any) => 
-    author.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const getImageUrl = (photoId: string) => {
-    if (!photoId) return null;
-    return `${DIRECTUS_URL}/assets/${photoId}?width=100&height=100&fit=cover`;
-  };
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = Colors[isDark ? 'dark' : 'light'];
 
   const renderItem = ({ item }: { item: any }) => (
     <List.Item
       title={item.name}
-      titleStyle={{ fontWeight: '600', fontSize: 16 }}
+      titleStyle={{ fontWeight: '600', fontSize: 16, color: colors.text }}
       left={() => (
         <Avatar.Image 
           size={52} 
@@ -53,26 +33,26 @@ export default function AuthorsScreen() {
           icon="pencil" 
           size={22}
           onPress={() => router.push({ pathname: '/edit-author', params: { id: item.id } })} 
-          style={{ backgroundColor: '#f5f5f5', borderRadius: 12, marginRight: 8 }}
+          style={{ backgroundColor: colors.input, borderRadius: 12, marginRight: 8 }}
         />
       )}
-      style={styles.listItem}
+      style={[styles.listItem, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}
     />
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Searchbar
         placeholder="Rechercher un auteur..."
         onChangeText={setSearchQuery}
         value={searchQuery}
-        style={styles.searchbar}
+        style={[styles.searchbar, { backgroundColor: colors.surface }]}
         elevation={0}
       />
       
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.tint} />
         </View>
       ) : (
         <FlatList
@@ -81,19 +61,20 @@ export default function AuthorsScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.tint} />
           }
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Aucun auteur trouvé</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Aucun auteur trouvé</Text>
           }
         />
       )}
 
       <FAB
         icon="plus"
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.tint }]}
         onPress={() => router.push('/edit-author')}
         label="Ajouter"
+        color="#fff"
       />
     </View>
   );
@@ -102,7 +83,6 @@ export default function AuthorsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
   },
   centered: {
     flex: 1,
@@ -114,7 +94,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     marginBottom: Spacing.sm,
     elevation: 0,
-    backgroundColor: Colors.light.surface,
     borderRadius: BorderRadius.md,
   },
   listContent: {
@@ -124,8 +103,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.light.border,
-    backgroundColor: Colors.light.surface,
   },
   fab: {
     position: 'absolute',
@@ -133,13 +110,11 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.light.tint,
     ...Shadows.large,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: Spacing.xxxl,
-    color: Colors.light.textSecondary,
     fontSize: 16,
   },
 });

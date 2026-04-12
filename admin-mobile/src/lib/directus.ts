@@ -2,10 +2,10 @@ import { createDirectus, rest, authentication } from '@directus/sdk';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-// Use localhost:8055 for web, fallback for mobile
-const BASE_URL = 'http://localhost:8055';
+// Use local fallback if env not found
+const BASE_URL = process.env.EXPO_PUBLIC_DIRECTUS_URL || 'http://localhost:8055';
 
-export const DIRECTUS_URL = BASE_URL;
+export const DIRECTUS_URL = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
 
 // Adaptateur de stockage compatible Web et Mobile
 const storageAdapter = {

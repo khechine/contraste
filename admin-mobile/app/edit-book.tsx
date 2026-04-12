@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Image, TouchableOpacity, Alert, Platform } from 'react-native';
-import { TextInput, Button, Text, SegmentedButtons, HelperText, ActivityIndicator, Portal, Dialog, List, IconButton, Divider } from 'react-native-paper';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { TextInput, Button, Text, SegmentedButtons, ActivityIndicator, Portal, Dialog, List, IconButton, Divider } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { directus, DIRECTUS_URL } from '../src/lib/directus';
-import { updateItem, createItem, readItem, uploadFiles, readItems } from '@directus/sdk';
-import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { updateItem, createItem, readItem, readItems } from '@directus/sdk';
+import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { useColorScheme } from '../hooks/use-color-scheme';
+import { useImageUpload } from '../src/hooks/use-image-upload';
+import ImageSelector from '../src/components/ImageSelector';
 
 export default function EditBookScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -17,6 +18,8 @@ export default function EditBookScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
+
+  const { pickImage, uploadToDirectus, uploading: isImageUploading } = useImageUpload();
 
   const [form, setForm] = useState({
     title: '',
@@ -37,7 +40,6 @@ export default function EditBookScreen() {
   });
 
   const [image, setImage] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [showAuthorPicker, setShowAuthorPicker] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [authorSearch, setAuthorSearch] = useState('');
@@ -82,8 +84,7 @@ export default function EditBookScreen() {
         cover_image: data.cover_image || null,
       });
       if (data.cover_image) {
-        const imgUrl = `${DIRECTUS_URL}/assets/${data.cover_image}`;
-        setImage(imgUrl);
+        setImage(`${DIRECTUS_URL}/assets/${data.cover_image}`);
       }
       return data;
     },
@@ -108,39 +109,9 @@ export default function EditBookScreen() {
     }));
   };
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  const uploadImage = async (uri: string) => {
-    const formData = new FormData();
-    const filename = uri.split('/').pop() || 'image.jpg';
-    const match = /\.(\w+)$/.exec(filename);
-    const type = match ? `image/${match[1]}` : `image/jpeg`;
-
-    if (Platform.OS === 'web') {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      formData.append('file', blob, filename);
-    } else {
-      formData.append('file', {
-        uri,
-        name: filename,
-        type,
-      } as any);
-    }
-
-    const response: any = await directus.request(uploadFiles(formData));
-    return response.id;
+  const handlePickImage = async () => {
+    const uri = await pickImage({ aspect: [3, 4] });
+    if (uri) setImage(uri);
   };
 
   const mutation = useMutation({
@@ -164,11 +135,10 @@ export default function EditBookScreen() {
 
   const handleSave = async () => {
     try {
-      setUploading(true);
       let coverId = form.cover_image;
 
       if (image && !image.startsWith('http')) {
-        coverId = await uploadImage(image);
+        coverId = await uploadToDirectus(image);
       }
 
       const payload = {
@@ -183,9 +153,7 @@ export default function EditBookScreen() {
       await mutation.mutateAsync(payload);
     } catch (e) {
       console.error(e);
-      Alert.alert('Erreur', "Échec de l'enregistrement");
-    } finally {
-      setUploading(false);
+      // Alert is already shown in useImageUpload or mutation.onError
     }
   };
 
@@ -193,41 +161,38 @@ export default function EditBookScreen() {
   const selectedCategory = categories?.find(c => c.id === form.category);
 
   if (loadingData) return (
-    <View style={styles.loader}>
+    <View style={[styles.loader, { backgroundColor: colors.background }]}>
       <ActivityIndicator size="large" color={colors.tint} />
-      <Text style={{marginTop: Spacing.md, color: Colors.light.textSecondary, fontSize: 14}}>Chargement...</Text>
+      <Text style={{ marginTop: Spacing.md, color: colors.textSecondary, fontSize: 14 }}>Chargement...</Text>
     </View>
   );
 
   if (error) return (
-    <View style={styles.loader}>
-      <Text style={{color: Colors.light.danger, fontSize: 16, fontWeight: '600'}}>Erreur de chargement</Text>
-      <Text style={{marginTop: Spacing.sm, color: Colors.light.textSecondary, fontSize: 14}}>{String(error)}</Text>
+    <View style={[styles.loader, { backgroundColor: colors.background }]}>
+      <Text style={{ color: colors.danger, fontSize: 16, fontWeight: '600' }}>Erreur de chargement</Text>
+      <Text style={{ marginTop: Spacing.sm, color: colors.textSecondary, fontSize: 14 }}>{String(error)}</Text>
     </View>
   );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={[styles.header, { backgroundColor: colors.surface }]}>
           <Text variant="headlineSmall" style={[styles.title, { color: colors.text }]}>
             {isEditing ? 'Modifier le livre' : 'Nouveau livre'}
           </Text>
         </View>
 
-        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.coverImage} />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <IconButton icon="camera" size={40} />
-              <Text>Sélectionner la couverture</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <ImageSelector 
+          uri={image} 
+          onPress={handlePickImage} 
+          loading={isImageUploading} 
+          label="Couverture du livre"
+          style={styles.imageSelector}
+        />
 
-        <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>Identité & Langue</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text variant="titleMedium" style={[styles.sectionTitle, { color: colors.text }]}>Identité & Langue</Text>
             <TextInput
             label="Titre (FR)"
             value={form.title}
@@ -282,8 +247,8 @@ export default function EditBookScreen() {
             />
         </View>
 
-        <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>Détails & Prix</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text variant="titleMedium" style={[styles.sectionTitle, { color: colors.text }]}>Détails & Prix</Text>
             <View style={styles.row}>
                 <TextInput
                     label="Prix DT"
@@ -331,8 +296,8 @@ export default function EditBookScreen() {
             </View>
         </View>
 
-        <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>Contenu & Statut</Text>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text variant="titleMedium" style={[styles.sectionTitle, { color: colors.text }]}>Contenu & Statut</Text>
             <TextInput
                 label="Résumé (FR)"
                 value={form.description}
@@ -362,7 +327,7 @@ export default function EditBookScreen() {
                 style={styles.segmented}
             />
 
-            <Text style={styles.sectionTitle}>Couleur du titre</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: Spacing.md }]}>Couleur du titre</Text>
             <TextInput
                 value={form.title_color}
                 onChangeText={(v) => setForm({ ...form, title_color: v })}
@@ -375,9 +340,9 @@ export default function EditBookScreen() {
         <Button
           mode="contained"
           onPress={handleSave}
-          loading={uploading || mutation.isPending}
-          disabled={uploading || mutation.isPending}
-          style={styles.saveButton}
+          loading={isImageUploading || mutation.isPending}
+          disabled={isImageUploading || mutation.isPending}
+          style={[styles.saveButton, { backgroundColor: colors.tint }]}
           contentStyle={{ height: 50 }}
         >
           {isEditing ? 'Enregistrer les modifications' : 'Créer le livre'}
@@ -413,12 +378,12 @@ export default function EditBookScreen() {
               <Divider />
               <List.Item
                 title="Ajouter un nouvel auteur..."
-                titleStyle={{ color: '#2196F3', fontWeight: 'bold' }}
+                titleStyle={{ color: colors.tint, fontWeight: 'bold' }}
                 onPress={() => {
                   setShowAuthorPicker(false);
                   router.push('/edit-author');
                 }}
-                left={props => <List.Icon {...props} icon="plus" color="#2196F3" />}
+                left={props => <List.Icon {...props} icon="plus" color={colors.tint} />}
               />
             </ScrollView>
           </Dialog.Content>
@@ -455,56 +420,28 @@ export default function EditBookScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
+  scrollContainer: {
+    padding: Spacing.lg,
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.light.background,
   },
   header: {
     marginBottom: Spacing.lg,
-    paddingHorizontal: Spacing.xs,
-    paddingTop: Spacing.sm,
-    paddingBottom: Spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.light.border,
-    backgroundColor: Colors.light.surface,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    ...Shadows.small,
   },
   title: {
     fontWeight: '700',
-    fontSize: 24,
-    color: Colors.light.text,
-    letterSpacing: -0.5,
+    fontSize: 22,
   },
-  imageContainer: {
-    width: '100%',
-    aspectRatio: 3 / 4,
-    maxHeight: 280,
-    backgroundColor: Colors.light.surface,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 2,
-    borderColor: Colors.light.border,
-    borderStyle: 'dashed',
-    overflow: 'hidden',
+  imageSelector: {
     marginBottom: Spacing.xl,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  coverImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  placeholderImage: {
-    alignItems: 'center',
-    gap: Spacing.sm,
   },
   section: {
-    backgroundColor: Colors.light.surface,
     padding: Spacing.xl,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
@@ -514,33 +451,23 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     fontWeight: '700',
     fontSize: 17,
-    color: Colors.light.text,
     letterSpacing: -0.3,
   },
   input: {
     marginBottom: Spacing.md,
-    backgroundColor: Colors.light.input,
-    borderRadius: BorderRadius.md,
-    fontSize: 16,
   },
   row: {
     flexDirection: 'row',
     marginBottom: 0,
     gap: Spacing.md,
   },
-  label: {
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.sm,
-    color: Colors.light.textSecondary,
-    fontSize: 14,
-  },
   segmented: {
     marginTop: Spacing.md,
+    marginBottom: Spacing.md,
   },
   saveButton: {
     marginTop: Spacing.xl,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.light.tint,
   },
 });

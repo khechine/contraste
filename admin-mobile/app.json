@@ -44,9 +44,6 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "extra": {
-      "EXPO_PUBLIC_DIRECTUS_URL": "http://localhost:8055"
     }
   }
 }
