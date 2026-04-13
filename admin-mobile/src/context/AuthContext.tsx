@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const cleanPassword = password; // Ne pas trimmer le mot de passe
       
       await directus.logout().catch(() => {});
-      await directus.login({ email: cleanEmail, password: cleanPassword });
+      await directus.login({ email: cleanEmail, password: cleanPassword }, { mode: 'cookie' });
       
       await new Promise(resolve => setTimeout(resolve, 500));
       const me = await directus.request(readMe());

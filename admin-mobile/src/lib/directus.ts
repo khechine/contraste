@@ -31,7 +31,7 @@ const storageAdapter = {
 
 // Création du client avec persistance
 // On utilise l'adaptateur pour toutes les plateformes (LocalStorage sur Web, SecureStore sur Mobile)
-const authConfig = authentication('cookie', { storage: storageAdapter as any });
+const authConfig = authentication('json', { storage: storageAdapter as any });
 
 export const directus = createDirectus(DIRECTUS_URL)
   .with(rest())
