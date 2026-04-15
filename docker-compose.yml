@@ -20,6 +20,8 @@ services:
       directus:
         condition: service_healthy
     restart: unless-stopped
+    extra_hosts:
+      - "directus.contraste.tn:host-gateway"
     networks:
       - app-network
 
