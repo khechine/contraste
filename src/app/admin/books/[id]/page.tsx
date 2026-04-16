@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
+import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function BookEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,12 +30,26 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
     category: '',
     language: '',
     is_featured: false,
-    cover_image: null
+    cover: null
   });
   const [authors, setAuthors] = useState<any[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const APP_CATEGORIES = [
+    'Roman',
+    'Essai',
+    'Histoire',
+    'Archéologie',
+    'Poésie',
+    'Soufisme',
+    'Art',
+    'Guide',
+    'Photo',
+    'Littérature',
+    'Biographie'
+  ];
 
   useEffect(() => {
     async function fetchData() {
@@ -45,7 +60,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
           method: 'GET',
           params: { sort: 'name', fields: 'id,name' }
         })) as any;
-        setAuthors(authorsRes.data);
+        setAuthors(authorsRes.data || []);
 
         if (!isNew) {
           const bookRes = await adminDirectus.request(() => ({
@@ -77,6 +92,9 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
       payload.price_eur = payload.price_eur ? parseFloat(payload.price_eur) : null;
       payload.pages = payload.pages ? parseInt(payload.pages) : null;
       payload.year = payload.year ? parseInt(payload.year) : null;
+      
+      // Ensure we don't send cover_image if it accidentally slipped into the object
+      delete (payload as any).cover_image;
 
       if (isNew) {
         await adminDirectus.request(() => ({
@@ -102,10 +120,54 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as any;
-    setBook((prev: any) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as any).checked : value
-    }));
+    
+    setBook((prev: any) => {
+      const updates: any = {
+        [name]: type === 'checkbox' ? (e.target as any).checked : value
+      };
+
+      // Auto-slug from title if slug is empty
+      if (name === 'title' && !prev.slug) {
+        updates.slug = slugify(value);
+      }
+
+      // Sync author_name when selecting an author (Backward compatibility for single relation)
+      if (name === 'author') {
+        const selectedAuthor = authors.find(a => a.id === value);
+        if (selectedAuthor) {
+          updates.author_name = selectedAuthor.name;
+        }
+      }
+
+      return { ...prev, ...updates };
+    });
+  };
+
+  const toggleAuthor = (authorId: string) => {
+    const selectedAuthor = authors.find(a => a.id === authorId);
+    if (!selectedAuthor) return;
+
+    setBook((prev: any) => {
+      let currentNames = prev.author_name ? prev.author_name.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+      
+      if (currentNames.includes(selectedAuthor.name)) {
+        currentNames = currentNames.filter((n: string) => n !== selectedAuthor.name);
+      } else {
+        currentNames.push(selectedAuthor.name);
+      }
+
+      const newAuthorName = currentNames.join(', ');
+      
+      // The relation (author_id) will store the first author in the list
+      const firstAuthorName = currentNames[0];
+      const firstAuthor = authors.find(a => a.name === firstAuthorName);
+      
+      return {
+        ...prev,
+        author_name: newAuthorName,
+        author: firstAuthor ? firstAuthor.id : null
+      };
+    });
   };
 
   if (loading) {
@@ -190,28 +252,47 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Auteur</label>
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-gray-500 ml-1">Sélectionner les auteurs</label>
               <select
-                name="author"
-                value={book.author || ''}
-                onChange={handleChange}
+                name="author_picker"
+                value=""
+                onChange={(e) => toggleAuthor(e.target.value)}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium appearance-none"
               >
-                <option value="">Sélectionner un auteur...</option>
+                <option value="">Ajouter un auteur...</option>
                 {authors.map((author: any) => (
-                  <option key={author.id} value={author.id}>{author.name}</option>
+                  <option key={author.id} value={author.id}>
+                    {book.author_name?.includes(author.name) ? `✓ ${author.name}` : author.name}
+                  </option>
                 ))}
               </select>
+
+              <div className="flex flex-wrap gap-2 mt-2">
+                {book.author_name?.split(',').map((name: string) => name.trim()).filter(Boolean).map((name: string) => (
+                  <button 
+                    key={name}
+                    type="button"
+                    onClick={() => {
+                      const a = authors.find(aut => aut.name === name);
+                      if (a) toggleAuthor(a.id);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-xl border border-teal-100 font-bold text-sm hover:bg-teal-100 transition-colors"
+                  >
+                    {name} <span className="text-teal-300">✕</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Nom de l'auteur (Texte affiché)</label>
+              <label className="text-sm font-bold text-gray-500 ml-1">Nom des auteurs (Affichage combiné)</label>
               <input
                 type="text"
                 name="author_name"
+                readOnly
                 value={book.author_name || ''}
-                onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
+                className="w-full px-5 py-4 bg-gray-100 border border-gray-100 rounded-2xl focus:outline-none cursor-not-allowed font-medium text-gray-500"
+                placeholder="Les auteurs sélectionnés apparaîtront ici"
               />
             </div>
           </div>
@@ -222,14 +303,17 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1">Catégorie</label>
-              <input
-                type="text"
+              <select
                 name="category"
                 value={book.category || ''}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
-                placeholder="Ex: Roman"
-              />
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium appearance-none"
+              >
+                <option value="">Sélectionner une catégorie...</option>
+                {APP_CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1">Prix (DT)</label>

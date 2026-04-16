@@ -6,6 +6,7 @@ export interface Author {
   name_en?: string;
   slug: string;
   bio: string;
+  bio_fr?: string;
   bio_en: string;
   bio_ar: string;
   image: string | null;
@@ -32,6 +33,7 @@ export interface Book {
   description: string;
   description_en: string;
   description_ar: string;
+  cover?: string | DirectusFile | null;
   cover_image: string | DirectusFile | null;
   price_dt: number;
   price_eur: number;
@@ -51,6 +53,7 @@ export interface News {
   title_ar: string;
   slug: string;
   content: string;
+  content_fr?: string;
   content_en: string;
   content_ar: string;
   excerpt: string;

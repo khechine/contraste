@@ -46,8 +46,8 @@ function getSeedAuthors(): Author[] {
       name: String(seed.name || ''),
       name_en: seed.name_en ? String(seed.name_en) : undefined,
       slug: String(seed.slug || slugify(String(seed.name || ''))),
-      bio: String(seed.bio_fr || ''),
-      bio_en: String(seed.bio_en || seed.bio_fr || ''),
+      bio: String(seed.bio_fr || seed.bio || ''),
+      bio_en: String(seed.bio_en || seed.bio_fr || seed.bio || ''),
       bio_ar: String(seed.bio_ar || ''),
       image: seed.photo ? String(seed.photo) : null,
       photo: seed.photo ? String(seed.photo) : null,
@@ -91,12 +91,12 @@ function getSeedNews(): News[] {
       title_en: String(seed.title || ''),
       title_ar: String(seed.title || ''),
       slug: String(seed.slug || slugify(String(seed.title || ''))),
-      content: String(seed.content || ''),
-      content_en: String(seed.content || ''),
-      content_ar: String(seed.content_ar || seed.content || ''),
-      excerpt: String(seed.content || '').substring(0, 150),
-      excerpt_en: String(seed.content || '').substring(0, 150),
-      excerpt_ar: String(seed.content_ar || seed.content || '').substring(0, 150),
+      content: String(seed.content_fr || seed.content || ''),
+      content_en: String(seed.content_en || seed.content_fr || seed.content || ''),
+      content_ar: String(seed.content_ar || seed.content_fr || seed.content || ''),
+      excerpt: String(seed.content_fr || seed.content || '').substring(0, 150),
+      excerpt_en: String(seed.content_en || seed.content_fr || seed.content || '').substring(0, 150),
+      excerpt_ar: String(seed.content_ar || seed.content_fr || seed.content || '').substring(0, 150),
       image: seed.image ? String(seed.image) : null,
       date: seed.date ? String(seed.date) : null,
       author: seed.author ? String(seed.author) : undefined,
@@ -111,10 +111,16 @@ export async function fetchAPI<T>(endpoint: string, params?: Record<string, stri
   }
   
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (process.env.DIRECTUS_TOKEN) {
+      headers['Authorization'] = `Bearer ${process.env.DIRECTUS_TOKEN}`;
+    }
+
     const res = await fetch(url.toString(), {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       next: { revalidate: 60 },
     });
     
@@ -147,17 +153,29 @@ export async function fetchAPI<T>(endpoint: string, params?: Record<string, stri
 export async function getBooks(limit: number = 500): Promise<Book[]> {
   const books = await fetchAPI<Book[]>('books', {
     limit: String(limit),
-    fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar',
+    fields: 'id,title,title_en,title_ar,slug,cover,cover.*,price_dt,price_eur,author_name,description,description_en,description_ar',
     sort: '-id',
   });
-  return books || [];
+  
+  return (books || []).map(book => ({
+    ...book,
+    cover_image: book.cover || null
+  }));
 }
 
 export async function getFeaturedBooks(): Promise<Book[]> {
-  const fields = 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar';
+  const fields = 'id,title,title_en,title_ar,slug,cover,cover.*,price_dt,price_eur,author_name,description,description_en,description_ar';
   
-  const featuredBooks = await fetchAPI<Book[]>('books', { filter: `{"is_featured":{"_eq":true}}`, sort: '-id', fields }) || [];
-  const latestBooks = await fetchAPI<Book[]>('books', { limit: '6', sort: '-id', fields }) || [];
+  const featuredBooksRaw = await fetchAPI<Book[]>('books', { filter: `{"is_featured":{"_eq":true}}`, sort: '-id', fields }) || [];
+  const latestBooksRaw = await fetchAPI<Book[]>('books', { limit: '6', sort: '-id', fields }) || [];
+
+  const mapBook = (book: any) => ({
+    ...book,
+    cover_image: book.cover || null
+  });
+
+  const featuredBooks = featuredBooksRaw.map(mapBook);
+  const latestBooks = latestBooksRaw.map(mapBook);
   
   const allBooks = [...featuredBooks];
   const featuredIds = new Set(featuredBooks.map(b => b.id));
@@ -192,15 +210,26 @@ export async function getLatestBook(): Promise<Book | null> {
   const books = await fetchAPI<Book[]>('books', {
     limit: '1',
     sort: '-id',
-    fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar',
+    fields: 'id,title,title_en,title_ar,slug,cover,cover.*,price_dt,price_eur,author_name,description,description_en,description_ar',
   });
-  return books && books.length > 0 ? books[0] : null;
+  
+  if (!books || books.length === 0) return null;
+  
+  return {
+    ...books[0],
+    cover_image: books[0].cover || null
+  };
 }
 
 export async function getBook(id: number): Promise<Book | null> {
   try {
-    const books = await fetchAPI<Book[]>('books', { filter: `{"id":{"_eq":${id}}}`, fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
-    return books[0] || null;
+    const books = await fetchAPI<Book[]>('books', { filter: `{"id":{"_eq":${id}}}`, fields: 'id,title,title_en,title_ar,slug,cover,cover.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
+    if (!books || books.length === 0) return null;
+    
+    return {
+      ...books[0],
+      cover_image: books[0].cover || null
+    };
   } catch {
     return null;
   }
@@ -208,9 +237,15 @@ export async function getBook(id: number): Promise<Book | null> {
 
 export async function getBookBySlug(slug: string): Promise<Book | null> {
   try {
-    const books = await fetchAPI<Book[]>('books', { filter: `{"slug":{"_eq":"${slug}"}}`, fields: 'id,title,title_en,title_ar,slug,cover_image,cover_image.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
-    if (books.length > 0 || process.env.NODE_ENV === 'production') {
-      return books[0] || null;
+    const books = await fetchAPI<Book[]>('books', { filter: `{"slug":{"_eq":"${slug}"}}`, fields: 'id,title,title_en,title_ar,slug,cover,cover.*,price_dt,price_eur,author_name,description,description_en,description_ar,author.*,category,year,pages,isbn,language' });
+    if (books && books.length > 0) {
+      return {
+        ...books[0],
+        cover_image: books[0].cover || null
+      };
+    }
+    if (process.env.NODE_ENV === 'production') {
+      return null;
     }
     return getSeedBooks().find((book) => book.slug === slug) || null;
   } catch {
@@ -228,9 +263,21 @@ export async function getAuthors(limit: number = 500): Promise<Author[]> {
 
 export async function getAuthor(id: number): Promise<Author | null> {
   try {
-    const authors = await fetchAPI<Author[]>('authors', { filter: `{"id":{"_eq":${id}}}` });
-    if (authors.length > 0 || process.env.NODE_ENV === 'production') {
-      return authors[0] || null;
+    const authors = await fetchAPI<Author[]>('authors', { 
+      filter: `{"id":{"_eq":${id}}}`,
+      fields: 'id,name,name_en,slug,bio_fr,bio_en,bio_ar,photo,country,is_author_of_month'
+    });
+    
+    if (authors && authors.length > 0) {
+      const author = authors[0];
+      return {
+        ...author,
+        bio: author.bio_fr || '',
+        image: author.photo || null
+      } as Author;
+    }
+    if (process.env.NODE_ENV === 'production') {
+      return null;
     }
     return getSeedAuthors().find((author) => author.id === id) || null;
   } catch {
@@ -240,9 +287,21 @@ export async function getAuthor(id: number): Promise<Author | null> {
 
 export async function getAuthorBySlug(slug: string): Promise<Author | null> {
   try {
-    const authors = await fetchAPI<Author[]>('authors', { filter: `{"slug":{"_eq":"${slug}"}}` });
-    if (authors.length > 0 || process.env.NODE_ENV === 'production') {
-      return authors[0] || null;
+    const authors = await fetchAPI<Author[]>('authors', { 
+      filter: `{"slug":{"_eq":"${slug}"}}`,
+      fields: 'id,name,name_en,slug,bio_fr,bio_en,bio_ar,photo,country,is_author_of_month'
+    });
+    
+    if (authors && authors.length > 0) {
+      const author = authors[0];
+      return {
+        ...author,
+        bio: author.bio_fr || '',
+        image: author.photo || null
+      } as Author;
+    }
+    if (process.env.NODE_ENV === 'production') {
+      return null;
     }
     return getSeedAuthors().find((author) => author.slug === slug) || null;
   } catch {
@@ -251,9 +310,21 @@ export async function getAuthorBySlug(slug: string): Promise<Author | null> {
 }
 
 export async function getNews(): Promise<News[]> {
-  const news = await fetchAPI<News[]>('news', { sort: '-date', limit: '12' });
-  if (news.length > 0 || process.env.NODE_ENV === 'production') {
-    return news;
+  const news = await fetchAPI<News[]>('news', { 
+    sort: '-date', 
+    limit: '12',
+    fields: 'id,title,title_en,title_ar,slug,content_fr,content_en,content_ar,image,date,author'
+  });
+  
+  if (news && news.length > 0) {
+    return news.map(item => ({
+      ...item,
+      content: item.content_fr || '',
+      excerpt: (item.content_fr || '').substring(0, 150)
+    }));
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return [];
   }
   return getSeedNews();
 }
@@ -275,9 +346,16 @@ export async function getFeaturedNews(limit = 3): Promise<News[]> {
 }
 
 export async function getHeroSections(): Promise<HeroSection[]> {
-  const heroes = await fetchAPI<HeroSection[]>('hero_sections?sort=order&fields=*,author_of_month.*,author_of_month.books.*', { sort: 'order' });
-  if (heroes.length > 0 || process.env.NODE_ENV === 'production') {
+  const heroes = await fetchAPI<HeroSection[]>('hero_sections', { 
+    sort: 'order', 
+    fields: '*,author_of_month.*,author_of_month.books.*' 
+  });
+  
+  if (heroes && heroes.length > 0) {
     return heroes;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return [];
   }
   return getSeedHeroSections();
 }
@@ -320,7 +398,11 @@ export async function getPressItems(): Promise<Press[]> {
     sort: '-publication_date',
     fields: 'id,title,media_name,publication_date,excerpt,article_url,logo,logo.*,featured,file_attachment,file_attachment.*',
   });
-  return press || [];
+  
+  return (press || []).map(item => ({
+    ...item,
+    media_name: item.media_name || ''
+  }));
 }
 
 export function getImageUrl(filename: string | null | undefined | { id: string; filename_disk: string }): string | null {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
+import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function AuthorEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,7 +16,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
   const [author, setAuthor] = useState<any>({
     name: '',
     slug: '',
-    bio: '',
+    bio_fr: '',
     bio_en: '',
     bio_ar: '',
     photo: null,
@@ -54,6 +55,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
 
     try {
       const payload = { ...author };
+      // Ensure we explicitly map bio_fr if it was renamed in state
       if (isNew) {
         await adminDirectus.request(() => ({
           path: '/items/authors',
@@ -78,10 +80,19 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as any;
-    setAuthor((prev: any) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as any).checked : value
-    }));
+    
+    setAuthor((prev: any) => {
+      const updates: any = {
+        [name]: type === 'checkbox' ? (e.target as any).checked : value
+      };
+
+      // Auto-slug from name if empty
+      if (name === 'name' && !prev.slug) {
+        updates.slug = slugify(value);
+      }
+
+      return { ...prev, ...updates };
+    });
   };
 
   if (loading) {
@@ -177,9 +188,9 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
                 🇫🇷 Biographie (Français)
               </label>
               <textarea
-                name="bio"
+                name="bio_fr"
                 rows={6}
-                value={author.bio || ''}
+                value={author.bio_fr || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
               />

@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminDirectus } from '@/lib/admin-directus';
+import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function NewsEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,7 +16,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
     title_en: '',
     title_ar: '',
     slug: '',
-    content: '',
+    content_fr: '',
     content_en: '',
     content_ar: '',
     date: new Date().toISOString().split('T')[0],
@@ -77,7 +78,17 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNews((prev: any) => ({ ...prev, [name]: value }));
+    
+    setNews((prev: any) => {
+      const updates: any = { [name]: value };
+
+      // Auto-slug from title if empty
+      if (name === 'title' && !prev.slug) {
+        updates.slug = slugify(value);
+      }
+
+      return { ...prev, ...updates };
+    });
   };
 
   if (loading) {
@@ -152,9 +163,9 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1">Corps du texte (Français) 🇫🇷</label>
               <textarea
-                name="content"
+                name="content_fr"
                 rows={12}
-                value={news.content || ''}
+                value={news.content_fr || ''}
                 onChange={handleChange}
                 className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed text-gray-700"
               />

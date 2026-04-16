@@ -19,7 +19,7 @@ export default function BooksListPage() {
           method: 'GET',
           params: {
             sort: '-id',
-            fields: 'id,title,slug,cover_image,author_name,category,price_dt'
+            fields: 'id,title,slug,cover,author_name,category,price_dt'
           }
         })) as any;
         setBooks(response.data || response || []);
@@ -116,9 +116,9 @@ export default function BooksListPage() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4 text-balanced">
                           <div className="w-14 h-20 rounded-xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {book?.cover_image ? (
+                            {book?.cover ? (
                               <img 
-                                src={getImageUrl(book.cover_image) || '/placeholder-book.png'} 
+                                src={getImageUrl(book.cover) || '/placeholder-book.png'} 
                                 alt={book?.title || 'Livre'}
                                 className="w-full h-full object-cover"
                               />
