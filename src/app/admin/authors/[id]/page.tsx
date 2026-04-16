@@ -86,8 +86,8 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
         [name]: type === 'checkbox' ? (e.target as any).checked : value
       };
 
-      // Auto-slug from name if empty
-      if (name === 'name' && !prev.slug) {
+      // Auto-slug from name if slug is empty or matches the previous auto-generated slug
+      if (name === 'name' && (!prev.slug || prev.slug === slugify(prev.name))) {
         updates.slug = slugify(value);
       }
 

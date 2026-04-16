@@ -60,7 +60,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
           method: 'GET',
           params: { sort: 'name', fields: 'id,name' }
         })) as any;
-        setAuthors(authorsRes.data || []);
+        setAuthors(authorsRes.data || authorsRes || []);
 
         if (!isNew) {
           const bookRes = await adminDirectus.request(() => ({
@@ -126,8 +126,8 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
         [name]: type === 'checkbox' ? (e.target as any).checked : value
       };
 
-      // Auto-slug from title if slug is empty
-      if (name === 'title' && !prev.slug) {
+      // Auto-slug from title if slug is empty or matches the slug of the previous title
+      if (name === 'title' && (!prev.slug || prev.slug === slugify(prev.title))) {
         updates.slug = slugify(value);
       }
 

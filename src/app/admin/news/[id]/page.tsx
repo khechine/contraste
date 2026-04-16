@@ -82,8 +82,8 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
     setNews((prev: any) => {
       const updates: any = { [name]: value };
 
-      // Auto-slug from title if empty
-      if (name === 'title' && !prev.slug) {
+      // Auto-slug from title if slug is empty or matches the previous auto-generated slug
+      if (name === 'title' && (!prev.slug || prev.slug === slugify(prev.title))) {
         updates.slug = slugify(value);
       }
 
