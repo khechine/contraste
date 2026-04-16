@@ -67,7 +67,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
             path: `/items/books/${id}`,
             method: 'GET'
           })) as any;
-          setBook(bookRes.data);
+          setBook(bookRes.data || {});
         }
       } catch (err: any) {
         console.error('Failed to fetch book data:', err);
@@ -126,8 +126,10 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
         [name]: type === 'checkbox' ? (e.target as any).checked : value
       };
 
-      // Auto-slug from title if slug is empty or matches the slug of the previous title
-      if (name === 'title' && (!prev.slug || prev.slug === slugify(prev.title))) {
+      // Auto-slug from title if slug is empty or matches the previous auto-generated slug
+      const currentSlug = prev?.slug || '';
+      const currentTitle = prev?.title || '';
+      if (name === 'title' && (!currentSlug || currentSlug === slugify(currentTitle))) {
         updates.slug = slugify(value);
       }
 
@@ -148,7 +150,8 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
     if (!selectedAuthor) return;
 
     setBook((prev: any) => {
-      let currentNames = prev.author_name ? prev.author_name.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+      if (!prev) return prev;
+      let currentNames = prev.author_name ? String(prev.author_name).split(',').map((s: string) => s.trim()).filter(Boolean) : [];
       
       if (currentNames.includes(selectedAuthor.name)) {
         currentNames = currentNames.filter((n: string) => n !== selectedAuthor.name);
@@ -220,7 +223,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
                 type="text"
                 name="slug"
                 required
-                value={book.slug || ''}
+                value={book?.slug || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-mono text-sm"
               />
@@ -263,7 +266,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
                 <option value="">Ajouter un auteur...</option>
                 {authors.map((author: any) => (
                   <option key={author.id} value={author.id}>
-                    {book.author_name?.includes(author.name) ? `✓ ${author.name}` : author.name}
+                    {book?.author_name?.includes(author.name) ? `✓ ${author.name}` : author.name}
                   </option>
                 ))}
               </select>
@@ -290,7 +293,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
                 type="text"
                 name="author_name"
                 readOnly
-                value={book.author_name || ''}
+                value={book?.author_name || ''}
                 className="w-full px-5 py-4 bg-gray-100 border border-gray-100 rounded-2xl focus:outline-none cursor-not-allowed font-medium text-gray-500"
                 placeholder="Les auteurs sélectionnés apparaîtront ici"
               />
@@ -305,7 +308,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <label className="text-sm font-bold text-gray-500 ml-1">Catégorie</label>
               <select
                 name="category"
-                value={book.category || ''}
+                value={book?.category || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium appearance-none"
               >
@@ -321,7 +324,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
                 type="number"
                 step="0.001"
                 name="price_dt"
-                value={book.price_dt || ''}
+                value={book?.price_dt || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -332,7 +335,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
                 type="number"
                 step="0.01"
                 name="price_eur"
-                value={book.price_eur || ''}
+                value={book?.price_eur || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -345,7 +348,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <input
                 type="number"
                 name="pages"
-                value={book.pages || ''}
+                value={book?.pages || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -355,7 +358,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <input
                 type="number"
                 name="year"
-                value={book.year || ''}
+                value={book?.year || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -365,7 +368,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <input
                 type="text"
                 name="language"
-                value={book.language || ''}
+                value={book?.language || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -396,7 +399,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <textarea
                 name="description"
                 rows={8}
-                value={book.description || ''}
+                value={book?.description || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
               />
@@ -406,7 +409,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <textarea
                 name="description_en"
                 rows={8}
-                value={book.description_en || ''}
+                value={book?.description_en || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
               />
@@ -416,7 +419,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <textarea
                 name="description_ar"
                 rows={8}
-                value={book.description_ar || ''}
+                value={book?.description_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
