@@ -49,12 +49,12 @@ echo "✅ Code à jour"
 # --- Arrêter l'app Next.js (pas Directus/DB pour éviter la perte de données) ---
 echo ""
 echo "⏹️  Arrêt du service app..."
-docker compose stop app 2>/dev/null || true
+sudo docker compose stop app 2>/dev/null || true
 
 # --- Build et démarrage de tous les services ---
 echo ""
 echo "🔨 Build et démarrage des containers..."
-docker compose --env-file "$ENV_FILE" up -d --build
+sudo docker compose --env-file "$ENV_FILE" up -d --build
 
 echo ""
 echo "⏳ Attente que Directus soit prêt..."
@@ -63,7 +63,7 @@ WAITED=0
 until curl -sf http://localhost:8055/server/health > /dev/null 2>&1; do
     if [ $WAITED -ge $MAX_WAIT ]; then
         echo "❌ Directus ne répond pas après ${MAX_WAIT}s"
-        docker compose logs directus --tail=50
+        sudo docker compose logs directus --tail=50
         exit 1
     fi
     echo "   ... attente (${WAITED}s)"
@@ -75,7 +75,7 @@ echo "✅ Directus est prêt !"
 # --- Nettoyage des images Docker orphelines ---
 echo ""
 echo "🧹 Nettoyage des anciennes images..."
-docker image prune -f 2>/dev/null || true
+sudo docker image prune -f 2>/dev/null || true
 
 # --- Statut final ---
 echo ""
@@ -83,7 +83,7 @@ echo "================================================"
 echo " ✅ Déploiement terminé !"
 echo "================================================"
 echo ""
-docker compose ps
+sudo docker compose ps
 echo ""
 echo "🌐 Site : https://www.contraste.tn"
 echo "🔧 CMS  : https://directus.contraste.tn/admin"
