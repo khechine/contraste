@@ -54,7 +54,18 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch all authors for the dropdown
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 2. Fetch all authors for the dropdown
         const authorsRes = await adminDirectus.request(() => ({
           path: '/items/authors',
           method: 'GET',
@@ -62,23 +73,30 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
         })) as any;
         setAuthors(authorsRes.data || authorsRes || []);
 
+        // 3. Fetch book if editing
         if (!isNew) {
           const bookRes = await adminDirectus.request(() => ({
             path: `/items/books/${id}`,
             method: 'GET'
           })) as any;
-          setBook(bookRes.data || {});
+          if (bookRes.data) {
+            setBook((prev: any) => ({ ...prev, ...bookRes.data }));
+          }
         }
       } catch (err: any) {
         console.error('Failed to fetch book data:', err);
-        setError("Une erreur est survénue lors du chargement des données.");
+        if (err.status === 401) {
+          router.push('/admin/login');
+        } else {
+          setError("Une erreur est survénue lors du chargement des données.");
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, [id, isNew]);
+  }, [id, isNew, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

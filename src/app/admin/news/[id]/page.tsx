@@ -27,25 +27,42 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isNew) return;
-
     async function fetchNews() {
       try {
-        const response = await adminDirectus.request(() => ({
-          path: `/items/news/${id}`,
-          method: 'GET'
-        })) as any;
-        setNews(response.data);
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        if (!isNew) {
+          const response = await adminDirectus.request(() => ({
+            path: `/items/news/${id}`,
+            method: 'GET'
+          })) as any;
+          if (response.data) {
+            setNews((prev: any) => ({ ...prev, ...response.data }));
+          }
+        }
       } catch (err: any) {
         console.error('Failed to fetch news:', err);
-        setError("Impossible de charger l'article.");
+        if (err.status === 401) {
+          router.push('/admin/login');
+        } else {
+          setError("Impossible de charger l'article.");
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchNews();
-  }, [id, isNew]);
+  }, [id, isNew, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -148,7 +165,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
               <input
                 type="date"
                 name="date"
-                value={news.date || ''}
+                value={news?.date || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -165,7 +182,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
               <textarea
                 name="content_fr"
                 rows={12}
-                value={news.content_fr || ''}
+                value={news?.content_fr || ''}
                 onChange={handleChange}
                 className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed text-gray-700"
               />
@@ -200,7 +217,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
               <textarea
                 name="content_ar"
                 rows={10}
-                value={news.content_ar || ''}
+                value={news?.content_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
                 className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed text-gray-700 shadow-inner"

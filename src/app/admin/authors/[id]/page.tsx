@@ -28,25 +28,42 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isNew) return;
-
     async function fetchAuthor() {
       try {
-        const response = await adminDirectus.request(() => ({
-          path: `/items/authors/${id}`,
-          method: 'GET'
-        })) as any;
-        setAuthor(response.data);
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        if (!isNew) {
+          const response = await adminDirectus.request(() => ({
+            path: `/items/authors/${id}`,
+            method: 'GET'
+          })) as any;
+          if (response.data) {
+            setAuthor((prev: any) => ({ ...prev, ...response.data }));
+          }
+        }
       } catch (err: any) {
         console.error('Failed to fetch author:', err);
-        setError("Impossible de charger l'auteur.");
+        if (err.status === 401) {
+          router.push('/admin/login');
+        } else {
+          setError("Impossible de charger l'auteur.");
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchAuthor();
-  }, [id, isNew]);
+  }, [id, isNew, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -157,7 +174,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <input
                 type="text"
                 name="country"
-                value={author.country || ''}
+                value={author?.country || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
                 placeholder="Ex: Tunisie"
@@ -190,7 +207,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <textarea
                 name="bio_fr"
                 rows={6}
-                value={author.bio_fr || ''}
+                value={author?.bio_fr || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
               />
@@ -203,7 +220,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <textarea
                 name="bio_en"
                 rows={6}
-                value={author.bio_en || ''}
+                value={author?.bio_en || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
               />
@@ -216,7 +233,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <textarea
                 name="bio_ar"
                 rows={6}
-                value={author.bio_ar || ''}
+                value={author?.bio_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
