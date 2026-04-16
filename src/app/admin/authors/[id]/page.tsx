@@ -111,7 +111,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
             ← Paramètres des auteurs
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isNew ? 'Créer un nouvel auteur' : `Modifier ${author.name}`}
+            {isNew ? 'Créer un nouvel auteur' : `Modifier ${author?.name || ''}`}
           </h1>
         </div>
       </header>
@@ -131,7 +131,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
                 type="text"
                 name="name"
                 required
-                value={author.name}
+                value={author?.name || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
                 placeholder="Ex: Houbeb Khechine"
@@ -143,9 +143,9 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
                 type="text"
                 name="slug"
                 required
-                value={author.slug}
+                value={author?.slug || ''}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium font-mono"
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-mono text-sm"
                 placeholder="ex-houbeb-khechine"
               />
             </div>
