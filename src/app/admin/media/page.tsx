@@ -1,19 +1,34 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
 
-export default function MediaManagerPage() {
+  const router = useRouter();
   const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchFiles();
-  }, []);
+    async function init() {
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+            path: '/users/me',
+            method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+            router.push('/admin/login');
+            return;
+        }
+
+        await fetchFiles();
+    }
+    init();
+  }, [router]);
 
   async function fetchFiles() {
     try {
@@ -25,9 +40,12 @@ export default function MediaManagerPage() {
           filter: '{"type":{"_starts_with":"image/"}}'
         }
       })) as any;
-      setFiles(response.data);
-    } catch (error) {
+      setFiles(response.data || response || []);
+    } catch (error: any) {
       console.error('Failed to fetch files:', error);
+      if (error.status === 401) {
+        router.push('/admin/login');
+      }
     } finally {
       setLoading(false);
     }
@@ -112,16 +130,16 @@ export default function MediaManagerPage() {
               <div key={`loading-${i}`} className="aspect-square bg-white rounded-3xl border border-gray-100 animate-pulse"></div>
             ))
           ) : (
-            files.map((file, index) => (
+            (files || []).map((file, index) => (
               <motion.div
-                key={file.id}
+                key={file?.id || index}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.02 }}
                 className="group relative aspect-square bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl transition-all cursor-pointer"
               >
                 <img 
-                  src={getImageUrl(file.id) || '/placeholder.png'} 
+                  src={getImageUrl(file?.id) || '/placeholder.png'} 
                   alt={file?.title || 'Fichier'}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -129,9 +147,11 @@ export default function MediaManagerPage() {
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button 
                     onClick={() => {
-                        const url = getImageUrl(file.id);
-                        if (url) navigator.clipboard.writeText(url);
-                        alert('URL copiée !');
+                        const url = getImageUrl(file?.id);
+                        if (url) {
+                            navigator.clipboard.writeText(url);
+                            alert('URL copiée !');
+                        }
                     }}
                     className="p-3 bg-white/20 backdrop-blur-md rounded-xl hover:bg-white/40 transition-colors text-white"
                     title="Copier l'URL"
@@ -139,7 +159,7 @@ export default function MediaManagerPage() {
                     🔗
                   </button>
                   <button 
-                    onClick={() => handleDelete(file.id)}
+                    onClick={() => file?.id && handleDelete(file.id)}
                     className="p-3 bg-red-500/50 backdrop-blur-md rounded-xl hover:bg-red-500 transition-colors text-white"
                     title="Supprimer"
                   >

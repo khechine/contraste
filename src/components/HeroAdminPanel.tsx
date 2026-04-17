@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { adminDirectus } from '@/lib/admin-directus';
 import { HeroSection } from '@/lib/types';
 
 interface HeroFormState {
@@ -63,21 +65,40 @@ function buildPayload(form: HeroFormState) {
 }
 
 export default function HeroAdminPanel() {
+  const router = useRouter();
   const [heroSections, setHeroSections] = useState<HeroSection[]>([]);
   const [formState, setFormState] = useState<HeroFormState>(defaultFormState);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [status, setStatus] = useState<string>('Chargement...');
 
   useEffect(() => {
-    loadHeroSections();
-  }, []);
+    async function init() {
+       // 1. Auth check
+       const user = await adminDirectus.request(() => ({
+         path: '/users/me',
+         method: 'GET',
+       })).catch(() => null);
+
+       if (!user) {
+         router.push('/admin/login');
+         return;
+       }
+
+       await loadHeroSections();
+    }
+    init();
+  }, [router]);
 
   async function loadHeroSections() {
     try {
       const response = await fetch('/api/admin/hero');
+      if (response.status === 401) {
+        router.push('/admin/login');
+        return;
+      }
       if (!response.ok) throw new Error('Impossible de charger les héros.');
       const data = await response.json();
-      setHeroSections(data);
+      setHeroSections(data || []);
       setStatus('');
     } catch (error) {
       setStatus('Erreur lors du chargement des sections hero.');
@@ -97,6 +118,11 @@ export default function HeroAdminPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+
+      if (response.status === 401) {
+        router.push('/admin/login');
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('Échec de la sauvegarde.');
@@ -148,6 +174,11 @@ export default function HeroAdminPanel() {
         method: 'DELETE',
       });
 
+      if (response.status === 401) {
+        router.push('/admin/login');
+        return;
+      }
+
       if (!response.ok) throw new Error('Impossible de supprimer.');
       await loadHeroSections();
       setStatus('Section hero supprimée.');
@@ -176,22 +207,22 @@ export default function HeroAdminPanel() {
         <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Sections hero existantes</h2>
           <div className="space-y-3">
-            {heroSections.length === 0 ? (
+            {(heroSections || []).length === 0 ? (
               <p className="text-sm text-slate-500">Aucune section hero trouvée.</p>
             ) : (
-              heroSections.map((hero) => (
-                <div key={hero.id} className="rounded-xl border border-slate-200 p-3 sm:p-4">
+              (heroSections || []).map((hero) => (
+                <div key={hero?.id || Math.random()} className="rounded-xl border border-slate-200 p-3 sm:p-4">
                   <div className="flex flex-col gap-3">
                     <div>
-                      <p className="text-xs sm:text-sm text-slate-500">ID {hero.id} · {hero.type || 'general'}</p>
+                      <p className="text-xs sm:text-sm text-slate-500">ID {hero?.id} · {hero?.type || 'general'}</p>
                       <h3 className="font-medium mt-1 text-sm sm:text-base">{hero?.title || hero?.title_en || hero?.title_ar || 'Sans titre'}</h3>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-1">{hero.cta_url || 'Pas de lien'} · ordre {hero.order ?? 0}</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-1">{hero?.cta_url || 'Pas de lien'} · ordre {hero?.order ?? 0}</p>
                     </div>
                     <div className="flex gap-2">
                       <button className="flex-1 sm:flex-none rounded-xl border border-slate-300 px-4 py-2.5 sm:py-1.5 text-sm text-slate-700 hover:bg-slate-100 min-h-[44px]" onClick={() => handleEdit(hero)}>
                         Modifier
                       </button>
-                      <button className="flex-1 sm:flex-none rounded-xl border border-rose-300 px-4 py-2.5 sm:py-1.5 text-sm text-rose-700 hover:bg-rose-50 min-h-[44px]" onClick={() => handleDelete(hero.id)}>
+                      <button className="flex-1 sm:flex-none rounded-xl border border-rose-300 px-4 py-2.5 sm:py-1.5 text-sm text-rose-700 hover:bg-rose-50 min-h-[44px]" onClick={() => handleDelete(hero?.id)}>
                         Supprimer
                       </button>
                     </div>

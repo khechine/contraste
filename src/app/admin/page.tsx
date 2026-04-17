@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { adminDirectus } from '@/lib/admin-directus';
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState({
     books: 0,
     authors: 0,
@@ -16,11 +18,23 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function fetchStats() {
       try {
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 2. Fetch stats
         const [books, authors, news, press] = await Promise.all([
-          adminDirectus.request(() => ({ path: '/items/books?aggregate[count]=*', method: 'GET' })),
-          adminDirectus.request(() => ({ path: '/items/authors?aggregate[count]=*', method: 'GET' })),
-          adminDirectus.request(() => ({ path: '/items/news?aggregate[count]=*', method: 'GET' })),
-          adminDirectus.request(() => ({ path: '/items/press?aggregate[count]=*', method: 'GET' })),
+          adminDirectus.request(() => ({ path: '/items/books?aggregate[count]=*', method: 'GET' })).catch(() => null),
+          adminDirectus.request(() => ({ path: '/items/authors?aggregate[count]=*', method: 'GET' })).catch(() => null),
+          adminDirectus.request(() => ({ path: '/items/news?aggregate[count]=*', method: 'GET' })).catch(() => null),
+          adminDirectus.request(() => ({ path: '/items/press?aggregate[count]=*', method: 'GET' })).catch(() => null),
         ]) as any[];
 
         const getCount = (res: any) => {
@@ -38,15 +52,18 @@ export default function AdminDashboardPage() {
           news: getCount(news),
           press: getCount(press),
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch dashboard stats:', error);
+        if (error.status === 401) {
+          router.push('/admin/login');
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchStats();
-  }, []);
+  }, [router]);
 
   const statCards = [
     { name: 'Livres', value: stats.books, icon: '📚', color: 'bg-blue-500' },
