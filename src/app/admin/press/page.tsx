@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
 import Link from 'next/link';
 
 export default function PressListPage() {
+  const router = useRouter();
   const [press, setPress] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
