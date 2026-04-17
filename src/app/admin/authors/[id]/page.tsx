@@ -8,6 +8,7 @@ import { getImageUrl } from '@/lib/directus';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function AuthorEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -242,6 +243,17 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               />
             </div>
           </div>
+        </div>
+
+        {/* Author Photo */}
+        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-4">
+          <h2 className="text-xl font-bold text-gray-800">Photo de l&apos;auteur</h2>
+          <ImageUploader
+            value={author?.photo || null}
+            onChange={(fileId) => setAuthor((prev: any) => ({ ...prev, photo: fileId || null }))}
+            label="Portrait"
+            hint="Format carré ou portrait recommandé"
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4 pb-10">

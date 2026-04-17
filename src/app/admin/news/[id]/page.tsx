@@ -6,6 +6,7 @@ import { adminDirectus } from '@/lib/admin-directus';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function NewsEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -234,6 +235,17 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
               />
             </div>
           </div>
+        </div>
+
+        {/* News Image */}
+        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-4">
+          <h2 className="text-xl font-bold text-gray-800">Image de couverture</h2>
+          <ImageUploader
+            value={news?.image || null}
+            onChange={(fileId) => setNews((prev: any) => ({ ...prev, image: fileId || null }))}
+            label="Image principale de l&apos;article"
+            hint="Format paysage recommandé (16:9)"
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4 pb-10">

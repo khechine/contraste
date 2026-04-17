@@ -8,6 +8,7 @@ import { getImageUrl } from '@/lib/directus';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function BookEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -52,45 +53,55 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
     'Biographie'
   ];
 
+  const [authorsError, setAuthorsError] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
+        const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
+        const token = await adminDirectus.getToken();
 
-        if (!user) {
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 1. Auth check
+        const meRes = await fetch(`${BASE_URL}/users/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!meRes.ok) {
           router.push('/admin/login');
           return;
         }
 
         // 2. Fetch all authors for the dropdown
-        const authorsRes = await adminDirectus.request(() => ({
-          path: '/items/authors?sort=name&fields=id,name',
-          method: 'GET',
-        })) as any;
-        setAuthors(authorsRes.data || (Array.isArray(authorsRes) ? authorsRes : []) || []);
+        const authorsRes = await fetch(`${BASE_URL}/items/authors?sort=name&fields=id,name`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (authorsRes.ok) {
+          const authorsData = await authorsRes.json();
+          setAuthors(authorsData.data || []);
+        } else {
+          setAuthorsError(true);
+        }
 
         // 3. Fetch book if editing
         if (!isNew) {
-          const bookRes = await adminDirectus.request(() => ({
-            path: `/items/books/${id}`,
-            method: 'GET'
-          })) as any;
-          const data = bookRes.data || bookRes;
-          if (data) {
-            setBook((prev: any) => ({ ...prev, ...data }));
+          const bookRes = await fetch(`${BASE_URL}/items/books/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (bookRes.ok) {
+            const bookData = await bookRes.json();
+            const data = bookData.data || bookData;
+            if (data) {
+              setBook((prev: any) => ({ ...prev, ...data }));
+            }
           }
         }
       } catch (err: any) {
         console.error('Failed to fetch book data:', err);
-        if (err.status === 401) {
-          router.push('/admin/login');
-        } else {
-          setError("Une erreur est survénue lors du chargement des données.");
-        }
+        setError("Une erreur est survenue lors du chargement des données.");
       } finally {
         setLoading(false);
       }
@@ -279,10 +290,12 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               <select
                 name="author_picker"
                 value=""
-                onChange={(e) => toggleAuthor(e.target.value)}
+                onChange={(e) => { if (e.target.value) toggleAuthor(e.target.value); }}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium appearance-none"
               >
-                <option value="">Ajouter un auteur...</option>
+                <option value="">
+                  {authorsError ? '⚠️ Erreur chargement des auteurs' : authors.length === 0 ? 'Chargement...' : 'Ajouter un auteur...'}
+                </option>
                 {authors.map((author: any) => (
                   <option key={author.id} value={author.id}>
                     {book?.author_name?.includes(author.name) ? `✓ ${author.name}` : author.name}
@@ -442,6 +455,17 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
               />
             </div>
           </div>
+        </div>
+
+        {/* Cover Image */}
+        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-4">
+          <h2 className="text-xl font-bold text-gray-800">Couverture du livre</h2>
+          <ImageUploader
+            value={book?.cover || null}
+            onChange={(fileId) => setBook((prev: any) => ({ ...prev, cover: fileId || null }))}
+            label="Image de couverture"
+            hint="Format portrait recommandé (3:4)"
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4 pb-20">

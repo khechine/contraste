@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { adminDirectus } from '@/lib/admin-directus';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function PressEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -205,6 +206,17 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
               minHeight="200px"
             />
           </div>
+        </div>
+
+        {/* Logo image */}
+        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-4">
+          <h2 className="text-xl font-bold text-gray-800">Logo du média</h2>
+          <ImageUploader
+            value={press?.logo || null}
+            onChange={(fileId) => setPress((prev: any) => ({ ...prev, logo: fileId || null }))}
+            label="Logo"
+            hint="Format carré ou transparent recommandé"
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4 pb-10">
