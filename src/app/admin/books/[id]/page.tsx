@@ -175,8 +175,8 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
     });
   };
 
-  const toggleAuthor = (authorId: string) => {
-    const selectedAuthor = authors.find(a => a.id === authorId);
+  const toggleAuthor = (authorId: string | number) => {
+    const selectedAuthor = authors.find(a => String(a.id) === String(authorId));
     if (!selectedAuthor) return;
 
     setBook((prev: any) => {
