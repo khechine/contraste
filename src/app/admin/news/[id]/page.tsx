@@ -95,7 +95,7 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     
     setNews((prev: any) => {

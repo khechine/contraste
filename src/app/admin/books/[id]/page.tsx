@@ -138,7 +138,7 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: any) => {
     const { name, value, type } = e.target as any;
     
     setBook((prev: any) => {

@@ -97,7 +97,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: any) => {
     const { name, value, type } = e.target as any;
     
     setAuthor((prev: any) => {

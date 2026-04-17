@@ -93,7 +93,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: any) => {
     const { name, value, type } = e.target as any;
     setPress((prev: any) => ({ 
       ...prev, 
