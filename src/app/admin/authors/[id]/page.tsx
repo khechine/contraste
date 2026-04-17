@@ -46,8 +46,9 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
             path: `/items/authors/${id}`,
             method: 'GET'
           })) as any;
-          if (response.data) {
-            setAuthor((prev: any) => ({ ...prev, ...response.data }));
+          const data = response.data || response;
+          if (data) {
+            setAuthor((prev: any) => ({ ...prev, ...data }));
           }
         }
       } catch (err: any) {

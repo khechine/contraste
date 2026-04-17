@@ -43,8 +43,9 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
             path: `/items/press/${id}`,
             method: 'GET'
           })) as any;
-          if (response.data) {
-            setPress((prev: any) => ({ ...prev, ...response.data }));
+          const data = response.data || response;
+          if (data) {
+            setPress((prev: any) => ({ ...prev, ...data }));
           }
         }
       } catch (err: any) {

@@ -45,8 +45,9 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
             path: `/items/news/${id}`,
             method: 'GET'
           })) as any;
-          if (response.data) {
-            setNews((prev: any) => ({ ...prev, ...response.data }));
+          const data = response.data || response;
+          if (data) {
+            setNews((prev: any) => ({ ...prev, ...data }));
           }
         }
       } catch (err: any) {

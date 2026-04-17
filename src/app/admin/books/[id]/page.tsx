@@ -79,8 +79,9 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
             path: `/items/books/${id}`,
             method: 'GET'
           })) as any;
-          if (bookRes.data) {
-            setBook((prev: any) => ({ ...prev, ...bookRes.data }));
+          const data = bookRes.data || bookRes;
+          if (data) {
+            setBook((prev: any) => ({ ...prev, ...data }));
           }
         }
       } catch (err: any) {
