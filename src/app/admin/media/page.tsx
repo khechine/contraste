@@ -61,25 +61,17 @@ export default function MediaManagerPage() {
     formData.append('file', file);
 
     try {
-      const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
-      const token = await adminDirectus.getToken();
-      
-      const response = await fetch(`${BASE_URL}/files`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
+      // Use the Directus SDK's request method which handles authentication automatically
+      await adminDirectus.request(() => ({
+          path: '/files',
+          method: 'POST',
+          body: formData
+      }));
 
-      if (response.ok) {
-        await fetchFiles();
-      } else {
-        alert('Erreur lors de l’upload.');
-      }
+      await fetchFiles();
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Erreur lors de l’upload.');
+      alert('Erreur lors de l’upload. Vérifiez votre connexion.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

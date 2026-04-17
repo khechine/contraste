@@ -4,6 +4,7 @@ import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminDirectus } from '@/lib/admin-directus';
 import Link from 'next/link';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 export default function PressEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -196,12 +197,12 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
         <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-8">
           <div className="space-y-2">
             <label className="text-sm font-bold text-gray-500 ml-1">Extrait du texte (Français)</label>
-            <textarea
+            <RichTextEditor
               name="excerpt"
-              rows={6}
               value={press?.excerpt || ''}
               onChange={handleChange}
-              className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+              placeholder="Saisissez un court extrait de l'article..."
+              minHeight="200px"
             />
           </div>
         </div>

@@ -7,6 +7,7 @@ import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 export default function BookEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -415,33 +416,30 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1">Description (Français) 🇫🇷</label>
-              <textarea
+              <RichTextEditor
                 name="description"
-                rows={8}
                 value={book?.description || ''}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+                placeholder="Décrivez l'ouvrage en français..."
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1">Description (Anglais) 🇬🇧</label>
-              <textarea
+              <RichTextEditor
                 name="description_en"
-                rows={8}
                 value={book?.description_en || ''}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+                placeholder="English description..."
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1 text-right block">Description (Arabe) 🇹🇳</label>
-              <textarea
+              <RichTextEditor
                 name="description_ar"
-                rows={8}
                 value={book?.description_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+                placeholder="وصف الكتاب باللغة العربية..."
               />
             </div>
           </div>

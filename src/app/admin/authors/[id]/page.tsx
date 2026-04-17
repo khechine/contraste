@@ -7,6 +7,7 @@ import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 export default function AuthorEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -205,12 +206,12 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <label className="text-sm font-bold text-gray-500 ml-1 flex items-center gap-2">
                 🇫🇷 Biographie (Français)
               </label>
-              <textarea
+              <RichTextEditor
                 name="bio_fr"
-                rows={6}
                 value={author?.bio_fr || ''}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+                placeholder="Biographie de l'auteur..."
+                minHeight="200px"
               />
             </div>
             
@@ -218,12 +219,12 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <label className="text-sm font-bold text-gray-500 ml-1 flex items-center gap-2">
                 🇬🇧 Biographie (Anglais)
               </label>
-              <textarea
+              <RichTextEditor
                 name="bio_en"
-                rows={6}
                 value={author?.bio_en || ''}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+                placeholder="Author biography in English..."
+                minHeight="200px"
               />
             </div>
 
@@ -231,13 +232,13 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
               <label className="text-sm font-bold text-gray-500 ml-1 flex items-center gap-2">
                 🇹🇳 Biographie (Arabe)
               </label>
-              <textarea
+              <RichTextEditor
                 name="bio_ar"
-                rows={6}
                 value={author?.bio_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
+                placeholder="سيرة الكاتب باللغة العربية..."
+                minHeight="200px"
               />
             </div>
           </div>

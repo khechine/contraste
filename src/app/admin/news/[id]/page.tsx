@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { adminDirectus } from '@/lib/admin-directus';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 export default function NewsEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -180,12 +181,21 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
           <div className="space-y-8">
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-500 ml-1">Corps du texte (Français) 🇫🇷</label>
-              <textarea
+              <RichTextEditor
                 name="content_fr"
-                rows={12}
                 value={news?.content_fr || ''}
                 onChange={handleChange}
-                className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed text-gray-700"
+                placeholder="Rédigez le contenu de l'article..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-500 ml-1">Contenu (Anglais) 🇬🇧</label>
+              <RichTextEditor
+                name="content_en"
+                value={news?.content_en || ''}
+                onChange={handleChange}
+                placeholder="Article content in English..."
               />
             </div>
 
@@ -214,14 +224,13 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Contenu (Arabe) 🇹🇳</label>
-              <textarea
+              <label className="text-sm font-bold text-gray-500 ml-1 text-right block">Contenu (Arabe) 🇹🇳</label>
+              <RichTextEditor
                 name="content_ar"
-                rows={10}
                 value={news?.content_ar || ''}
                 onChange={handleChange}
                 dir="rtl"
-                className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed text-gray-700 shadow-inner"
+                placeholder="محتوى المقال باللغة العربية..."
               />
             </div>
           </div>
