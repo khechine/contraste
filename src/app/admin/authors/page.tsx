@@ -14,6 +14,18 @@ export default function AuthorsListPage() {
   useEffect(() => {
     async function fetchAuthors() {
       try {
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 2. Fetch authors
         const response = await adminDirectus.request(() => ({
           path: '/items/authors',
           method: 'GET',
@@ -23,18 +35,21 @@ export default function AuthorsListPage() {
           }
         })) as any;
         setAuthors(response.data || response || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch authors:', error);
+        if (error.status === 401) {
+          router.push('/admin/login');
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchAuthors();
-  }, []);
+  }, [router]);
 
   const filteredAuthors = (authors || []).filter(author => 
-    author.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    author?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -97,9 +112,9 @@ export default function AuthorsListPage() {
                     </tr>
                   ))
                 ) : (
-                  filteredAuthors.map((author, index) => (
+                  (filteredAuthors || []).map((author, index) => (
                     <motion.tr 
-                      key={author.id}
+                      key={author?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -108,32 +123,32 @@ export default function AuthorsListPage() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {author.photo ? (
+                            {author?.photo ? (
                               <img 
                                 src={getImageUrl(author.photo) || '/placeholder.png'} 
-                                alt={author.name}
+                                alt={author?.name || 'Auteur'}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-300 text-xl font-bold bg-white">
-                                {author.name.charAt(0)}
+                                {author?.name?.charAt(0) || '?'}
                               </div>
                             )}
                           </div>
-                          <Link href={`/admin/authors/${author.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
-                            {author.name}
+                          <Link href={`/admin/authors/${author?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
+                            {author?.name || 'Sans nom'}
                           </Link>
                         </div>
                       </td>
                       <td className="px-8 py-6 hidden md:table-cell">
                         <span className="text-sm font-mono text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                          {author.slug}
+                          {author?.slug || 'no-slug'}
                         </span>
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex justify-end gap-3">
                           <Link 
-                            href={`/admin/authors/${author.id}`}
+                            href={`/admin/authors/${author?.id}`}
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-teal-50 hover:text-teal-600 rounded-xl transition-all font-bold border border-gray-100"
                             title="Modifier"
                           >
@@ -143,7 +158,7 @@ export default function AuthorsListPage() {
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100"
                             title="Supprimer"
                             onClick={() => {
-                              if (confirm(`Voulez-vous vraiment supprimer l'auteur "${author.name}" ?`)) {
+                              if (author?.id && confirm(`Voulez-vous vraiment supprimer l'auteur "${author.name}" ?`)) {
                                 // Delete logic
                               }
                             }}

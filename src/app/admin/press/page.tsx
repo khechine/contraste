@@ -13,6 +13,18 @@ export default function PressListPage() {
   useEffect(() => {
     async function fetchPress() {
       try {
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 2. Fetch press
         const response = await adminDirectus.request(() => ({
           path: '/items/press',
           method: 'GET',
@@ -22,15 +34,18 @@ export default function PressListPage() {
           }
         })) as any;
         setPress(response.data || response || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch press items:', error);
+        if (error.status === 401) {
+          router.push('/admin/login');
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchPress();
-  }, []);
+  }, [router]);
 
   return (
     <div className="space-y-8">
@@ -80,7 +95,7 @@ export default function PressListPage() {
                 ) : (
                   (press || []).map((item, index) => (
                     <motion.tr 
-                      key={item.id}
+                      key={item?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -89,9 +104,9 @@ export default function PressListPage() {
                       <td className="px-8 py-6">
                         <div className="flex flex-col min-w-0">
                           <Link href={`/admin/press/${item?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1 mb-1">
-                            {item?.title}
+                            {item?.title || 'Article sans titre'}
                           </Link>
-                          <span className="text-sm text-gray-400 font-bold">{item?.media_name}</span>
+                          <span className="text-sm text-gray-400 font-bold">{item?.media_name || 'Média inconnu'}</span>
                         </div>
                       </td>
                       <td className="px-8 py-6 hidden md:table-cell">
@@ -113,7 +128,7 @@ export default function PressListPage() {
                       <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-3">
                           <Link 
-                            href={`/admin/press/${item.id}`}
+                            href={`/admin/press/${item?.id}`}
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-teal-50 hover:text-teal-600 rounded-xl transition-all font-bold border border-gray-100"
                             title="Modifier"
                           >

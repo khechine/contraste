@@ -14,6 +14,18 @@ export default function BooksListPage() {
   useEffect(() => {
     async function fetchBooks() {
       try {
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 2. Fetch books
         const response = await adminDirectus.request(() => ({
           path: '/items/books',
           method: 'GET',
@@ -23,19 +35,22 @@ export default function BooksListPage() {
           }
         })) as any;
         setBooks(response.data || response || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch books:', error);
+        if (error.status === 401) {
+          router.push('/admin/login');
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchBooks();
-  }, []);
+  }, [router]);
 
   const filteredBooks = (books || []).filter(book => 
-    book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.author_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    book?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book?.author_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -105,9 +120,9 @@ export default function BooksListPage() {
                     </tr>
                   ))
                 ) : (
-                  filteredBooks.map((book, index) => (
+                  (filteredBooks || []).map((book, index) => (
                     <motion.tr 
-                      key={book.id}
+                      key={book?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -130,26 +145,26 @@ export default function BooksListPage() {
                           </div>
                           <div className="flex flex-col min-w-0">
                             <Link href={`/admin/books/${book?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
-                              {book?.title}
+                              {book?.title || 'Sans titre'}
                             </Link>
-                            <span className="text-sm text-gray-400 font-medium line-clamp-1">{book?.author_name}</span>
+                            <span className="text-sm text-gray-400 font-medium line-clamp-1">{book?.author_name || 'Auteur inconnu'}</span>
                           </div>
                         </div>
                       </td>
                       <td className="px-8 py-6 hidden lg:table-cell">
                         <span className="text-xs font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
-                          {book.category || 'N/A'}
+                          {book?.category || 'N/A'}
                         </span>
                       </td>
                       <td className="px-8 py-6 hidden md:table-cell">
                         <span className="text-sm font-bold text-gray-700">
-                          {book.price_dt ? `${book.price_dt} DT` : 'Offert'}
+                          {book?.price_dt ? `${book.price_dt} DT` : 'Offert'}
                         </span>
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-3">
                           <Link 
-                            href={`/admin/books/${book.id}`}
+                            href={`/admin/books/${book?.id}`}
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-teal-50 hover:text-teal-600 rounded-xl transition-all font-bold border border-gray-100"
                             title="Modifier"
                           >

@@ -25,25 +25,42 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isNew) return;
-
     async function fetchPress() {
       try {
-        const response = await adminDirectus.request(() => ({
-          path: `/items/press/${id}`,
-          method: 'GET'
-        })) as any;
-        setPress(response.data);
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        if (!isNew) {
+          const response = await adminDirectus.request(() => ({
+            path: `/items/press/${id}`,
+            method: 'GET'
+          })) as any;
+          if (response.data) {
+            setPress((prev: any) => ({ ...prev, ...response.data }));
+          }
+        }
       } catch (err: any) {
         console.error('Failed to fetch press item:', err);
-        setError("Impossible de charger l'article de presse.");
+        if (err.status === 401) {
+          router.push('/admin/login');
+        } else {
+          setError("Impossible de charger l'article de presse.");
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchPress();
-  }, [id, isNew]);
+  }, [id, isNew, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -130,7 +147,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
                 type="text"
                 name="media_name"
                 required
-                value={press.media_name || ''}
+                value={press?.media_name || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
                 placeholder="Ex: La Presse, Kapitalis..."
@@ -141,7 +158,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
               <input
                 type="date"
                 name="publication_date"
-                value={press.publication_date || ''}
+                value={press?.publication_date || ''}
                 onChange={handleChange}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
               />
@@ -153,7 +170,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
             <input
               type="text"
               name="article_url"
-              value={press.article_url || ''}
+              value={press?.article_url || ''}
               onChange={handleChange}
               className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-mono text-sm"
               placeholder="https://..."
@@ -165,7 +182,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
               type="checkbox"
               id="featured"
               name="featured"
-              checked={press.featured || false}
+              checked={press?.featured || false}
               onChange={handleChange}
               className="w-6 h-6 text-teal-600 bg-gray-100 border-gray-200 rounded-lg focus:ring-teal-500 focus:ring-offset-0"
             />
@@ -181,7 +198,7 @@ export default function PressEditorPage({ params }: { params: Promise<{ id: stri
             <textarea
               name="excerpt"
               rows={6}
-              value={press.excerpt || ''}
+              value={press?.excerpt || ''}
               onChange={handleChange}
               className="w-full px-6 py-5 bg-gray-50 border border-gray-100 rounded-[28px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium leading-relaxed"
             />

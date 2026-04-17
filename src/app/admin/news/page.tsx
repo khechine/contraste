@@ -14,6 +14,18 @@ export default function NewsListPage() {
   useEffect(() => {
     async function fetchNews() {
       try {
+        // 1. Auth check
+        const user = await adminDirectus.request(() => ({
+          path: '/users/me',
+          method: 'GET',
+        })).catch(() => null);
+
+        if (!user) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // 2. Fetch news
         const response = await adminDirectus.request(() => ({
           path: '/items/news',
           method: 'GET',
@@ -23,18 +35,21 @@ export default function NewsListPage() {
           }
         })) as any;
         setNews(response.data || response || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch news:', error);
+        if (error.status === 401) {
+          router.push('/admin/login');
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchNews();
-  }, []);
+  }, [router]);
 
   const filteredNews = (news || []).filter(item => 
-    item.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    item?.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -97,9 +112,9 @@ export default function NewsListPage() {
                     </tr>
                   ))
                 ) : (
-                  filteredNews.map((item, index) => (
+                  (filteredNews || []).map((item, index) => (
                     <motion.tr 
-                      key={item.id}
+                      key={item?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -121,19 +136,19 @@ export default function NewsListPage() {
                             )}
                           </div>
                           <Link href={`/admin/news/${item?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-2 max-w-md">
-                            {item?.title}
+                            {item?.title || 'Sans titre'}
                           </Link>
                         </div>
                       </td>
                       <td className="px-8 py-6 hidden md:table-cell">
                         <span className="text-sm text-gray-400 font-medium">
-                          {item.date ? new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Non daté'}
+                          {item?.date ? new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Non daté'}
                         </span>
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-3">
                           <Link 
-                            href={`/admin/news/${item.id}`}
+                            href={`/admin/news/${item?.id}`}
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-teal-50 hover:text-teal-600 rounded-xl transition-all font-bold border border-gray-100"
                             title="Modifier"
                           >
