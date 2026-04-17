@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { adminDirectus } from '@/lib/admin-directus';
 import { getImageUrl } from '@/lib/directus';
 
+export default function MediaManagerPage() {
   const router = useRouter();
   const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
