@@ -125,7 +125,7 @@ export default function MediaManagerPage() {
 
   return (
     <div className="space-y-10 py-4">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Médiathèque</h1>
           <p className="text-gray-500 font-medium">Gérez vos couvertures, portraits et assets visuels.</p>
@@ -133,7 +133,7 @@ export default function MediaManagerPage() {
         <button 
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2"
+          className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           {uploading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : '📤 Téléverser'}
         </button>
