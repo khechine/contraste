@@ -61,17 +61,31 @@ export default function MediaManagerPage() {
     formData.append('file', file);
 
     try {
-      // Use the Directus SDK's request method which handles authentication automatically
-      await adminDirectus.request(() => ({
-          path: '/files',
-          method: 'POST',
-          body: formData
-      }));
+      const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
+      const token = await adminDirectus.getToken();
 
-      await fetchFiles();
+      if (!token) {
+        alert('Session expirée, veuillez vous reconnecter.');
+        router.push('/admin/login');
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/files`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (response.status === 403) {
+        alert('Permission refusée. Vérifiez les droits de votre rôle dans Directus.');
+      } else if (!response.ok) {
+        alert(`Erreur lors de l'upload (HTTP ${response.status}).`);
+      } else {
+        await fetchFiles();
+      }
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Erreur lors de l’upload. Vérifiez votre connexion.');
+      alert('Erreur réseau lors de l\'upload.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -80,16 +94,32 @@ export default function MediaManagerPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Voulez-vous vraiment supprimer cette image ?')) return;
-    
+
     try {
-      await adminDirectus.request(() => ({
-        path: `/files/${id}`,
-        method: 'DELETE'
-      }));
-      setFiles((files || []).filter(f => f.id !== id));
+      const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
+      const token = await adminDirectus.getToken();
+
+      if (!token) {
+        alert('Session expirée, veuillez vous reconnecter.');
+        router.push('/admin/login');
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/files/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.status === 403) {
+        alert('Permission refusée. Vérifiez les droits de votre rôle dans Directus.');
+      } else if (response.ok || response.status === 204) {
+        setFiles((files || []).filter(f => f.id !== id));
+      } else {
+        alert(`Erreur lors de la suppression (HTTP ${response.status}).`);
+      }
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Erreur lors de la suppression.');
+      alert('Erreur réseau lors de la suppression.');
     }
   };
 

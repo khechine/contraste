@@ -68,11 +68,10 @@ export default function BookEditorPage({ params }: { params: Promise<{ id: strin
 
         // 2. Fetch all authors for the dropdown
         const authorsRes = await adminDirectus.request(() => ({
-          path: '/items/authors',
+          path: '/items/authors?sort=name&fields=id,name',
           method: 'GET',
-          params: { sort: 'name', fields: 'id,name' }
         })) as any;
-        setAuthors(authorsRes.data || authorsRes || []);
+        setAuthors(authorsRes.data || (Array.isArray(authorsRes) ? authorsRes : []) || []);
 
         // 3. Fetch book if editing
         if (!isNew) {
