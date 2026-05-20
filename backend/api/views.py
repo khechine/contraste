@@ -79,7 +79,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return AuthorDetailSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'by_slug', 'author_of_month']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -126,7 +126,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return BookDetailSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'by_slug', 'featured', 'latest']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -177,7 +177,7 @@ class NewsViewSet(viewsets.ModelViewSet):
         return NewsDetailSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'by_slug']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
