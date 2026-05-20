@@ -250,6 +250,18 @@ def migrate_books(author_id_map):
             if directus_author_id:
                 django_author_id = author_id_map.get(directus_author_id)
 
+        # Map language choice from Directus format to Django choices
+        raw_lang = (raw.get('language') or '').strip().lower()
+        lang_code = 'fr'
+        if 'arabe' in raw_lang or raw_lang == 'ar':
+            lang_code = 'ar'
+        elif 'anglais' in raw_lang or 'english' in raw_lang or raw_lang == 'en':
+            lang_code = 'en'
+        elif 'bilingue' in raw_lang or raw_lang == 'bi':
+            lang_code = 'bi'
+        else:
+            lang_code = 'fr'
+
         data = {
             'title': title,
             'title_en': raw.get('title_en', '') or '',
@@ -265,7 +277,7 @@ def migrate_books(author_id_map):
             'year': raw.get('year'),
             'pages': raw.get('pages'),
             'isbn': raw.get('isbn', '') or '',
-            'language': raw.get('language', 'fr') or 'fr',
+            'language': lang_code,
             'category': raw.get('category', '') or '',
             'is_featured': raw.get('is_featured', False) or False,
         }
