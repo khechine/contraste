@@ -10,7 +10,7 @@ import LatestBookShowcase from './LatestBookShowcase';
 import BooksCarouselHero from './BooksCarouselHero';
 import { Locale, getLocalizedField, getBooksRoute, getAuthorsRoute, getNewsRoute } from '@/lib/i18n';
 import { Book, HeroSection, News, Author } from '@/lib/types';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 
 interface AnimatedHomeProps {
   heroes: HeroSection[];

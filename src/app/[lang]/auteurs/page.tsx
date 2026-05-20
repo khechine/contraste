@@ -1,4 +1,4 @@
-import { getAuthors } from '@/lib/directus';
+import { getAuthors } from '@/lib/django';
 import { Locale } from '@/lib/i18n';
 import AnimatedAuthors from '@/components/AnimatedAuthors';
 

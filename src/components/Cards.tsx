@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Book, Author, News } from '@/lib/types';
 import { Locale, getLocalizedField } from '@/lib/i18n';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 
 interface BookCardProps {
   book: Book;

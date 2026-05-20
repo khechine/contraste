@@ -1,487 +1,390 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
-import { slugify } from '@/lib/utils';
+import { adminGet, adminCreate, adminUpdate, adminList } from '@/lib/admin-django';
 import Link from 'next/link';
-import RichTextEditor from '@/components/admin/RichTextEditor';
-import ImageUploader from '@/components/admin/ImageUploader';
 
-export default function BookEditorPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+const DJANGO_URL = process.env.NEXT_PUBLIC_DJANGO_URL || 'http://localhost:8000';
+
+const LANGUAGES = [
+  { value: 'fr', label: 'Français' },
+  { value: 'ar', label: 'Arabe' },
+  { value: 'en', label: 'Anglais' },
+  { value: 'bi', label: 'Bilingue' },
+];
+
+export default function BookEditPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string;
   const isNew = id === 'new';
 
-  const [book, setBook] = useState<any>({
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [authors, setAuthors] = useState<any[]>([]);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const [form, setForm] = useState({
     title: '',
     title_en: '',
     title_ar: '',
     slug: '',
+    author: '',
     author_name: '',
-    author: null,
     description: '',
     description_en: '',
     description_ar: '',
     price_dt: '',
     price_eur: '',
-    pages: '',
     year: '',
+    pages: '',
+    isbn: '',
+    language: 'fr',
     category: '',
-    language: '',
     is_featured: false,
-    cover: null
   });
-  const [authors, setAuthors] = useState<any[]>([]);
-  const [loading, setLoading] = useState(!isNew);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const APP_CATEGORIES = [
-    'Roman',
-    'Essai',
-    'Histoire',
-    'Archéologie',
-    'Poésie',
-    'Soufisme',
-    'Art',
-    'Guide',
-    'Photo',
-    'Littérature',
-    'Biographie'
-  ];
-
-  const [authorsError, setAuthorsError] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
-        const token = await adminDirectus.getToken();
+    adminList('authors', { ordering: 'name', limit: '500' }).then((data) => {
+      setAuthors(Array.isArray(data) ? data : []);
+    });
 
-        if (!token) {
-          router.push('/admin/login');
-          return;
-        }
-
-        // 1. Auth check
-        const meRes = await fetch(`${BASE_URL}/users/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!meRes.ok) {
-          router.push('/admin/login');
-          return;
-        }
-
-        // 2. Fetch all authors for the dropdown
-        const authorsRes = await fetch(`${BASE_URL}/items/authors?sort=name&fields=id,name`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (authorsRes.ok) {
-          const authorsData = await authorsRes.json();
-          setAuthors(authorsData.data || []);
-        } else {
-          setAuthorsError(true);
-        }
-
-        // 3. Fetch book if editing
-        if (!isNew) {
-          const bookRes = await fetch(`${BASE_URL}/items/books/${id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+    if (!isNew) {
+      adminGet('books', id)
+        .then((data) => {
+          setForm({
+            title: data.title || '',
+            title_en: data.title_en || '',
+            title_ar: data.title_ar || '',
+            slug: data.slug || '',
+            author: data.author ? String(data.author) : '',
+            author_name: data.author_name || '',
+            description: data.description || '',
+            description_en: data.description_en || '',
+            description_ar: data.description_ar || '',
+            price_dt: data.price_dt ? String(data.price_dt) : '',
+            price_eur: data.price_eur ? String(data.price_eur) : '',
+            year: data.year ? String(data.year) : '',
+            pages: data.pages ? String(data.pages) : '',
+            isbn: data.isbn || '',
+            language: data.language || 'fr',
+            category: data.category || '',
+            is_featured: data.is_featured || false,
           });
-          if (bookRes.ok) {
-            const bookData = await bookRes.json();
-            const data = bookData.data || bookData;
-            if (data) {
-              setBook((prev: any) => ({ ...prev, ...data }));
-            }
-          }
-        }
-      } catch (err: any) {
-        console.error('Failed to fetch book data:', err);
-        setError("Une erreur est survenue lors du chargement des données.");
-      } finally {
-        setLoading(false);
-      }
+          if (data.cover_url) setCoverPreview(data.cover_url);
+        })
+        .catch(() => router.push('/admin/books'))
+        .finally(() => setLoading(false));
     }
+  }, [id, isNew]);
 
-    fetchData();
-  }, [id, isNew, router]);
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const { name, value, type } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }));
+  }
+
+  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError('');
 
     try {
-      const payload = { ...book };
-      // Convert numeric strings back to numbers
-      payload.price_dt = payload.price_dt ? parseFloat(payload.price_dt) : null;
-      payload.price_eur = payload.price_eur ? parseFloat(payload.price_eur) : null;
-      payload.pages = payload.pages ? parseInt(payload.pages) : null;
-      payload.year = payload.year ? parseInt(payload.year) : null;
-      
-      // Ensure we don't send cover_image if it accidentally slipped into the object
-      delete (payload as any).cover_image;
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== '' && value !== null && value !== undefined) {
+          formData.append(key, String(value));
+        }
+      });
+      if (coverFile) {
+        formData.append('cover', coverFile);
+      }
 
       if (isNew) {
-        await adminDirectus.request(() => ({
-          path: '/items/books',
-          method: 'POST',
-          body: JSON.stringify(payload)
-        }));
+        await adminCreate('books', formData);
       } else {
-        await adminDirectus.request(() => ({
-          path: `/items/books/${id}`,
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        }));
+        await adminUpdate('books', id, formData);
       }
+
       router.push('/admin/books');
     } catch (err: any) {
-      console.error('Failed to save book:', err);
-      setError('Erreur lors de l’enregistrement. Vérifiez que le slug est unique.');
+      console.error('Save error:', err);
+      alert(`Erreur: ${err.message}`);
     } finally {
       setSaving(false);
     }
   }
 
-  const handleChange = (e: any) => {
-    const { name, value, type } = e.target as any;
-    
-    setBook((prev: any) => {
-      const updates: any = {
-        [name]: type === 'checkbox' ? (e.target as any).checked : value
-      };
-
-      // Auto-slug from title if slug is empty or matches the previous auto-generated slug
-      const currentSlug = prev?.slug || '';
-      const currentTitle = prev?.title || '';
-      if (name === 'title' && (!currentSlug || currentSlug === slugify(currentTitle))) {
-        updates.slug = slugify(value);
-      }
-
-      // Sync author_name when selecting an author (Backward compatibility for single relation)
-      if (name === 'author') {
-        const selectedAuthor = authors.find(a => a.id === value);
-        if (selectedAuthor) {
-          updates.author_name = selectedAuthor.name;
-        }
-      }
-
-      return { ...prev, ...updates };
-    });
-  };
-
-  const toggleAuthor = (authorId: string | number) => {
-    const selectedAuthor = authors.find(a => String(a.id) === String(authorId));
-    if (!selectedAuthor) return;
-
-    setBook((prev: any) => {
-      if (!prev) return prev;
-      let currentNames = prev.author_name ? String(prev.author_name).split(',').map((s: string) => s.trim()).filter(Boolean) : [];
-      
-      if (currentNames.includes(selectedAuthor.name)) {
-        currentNames = currentNames.filter((n: string) => n !== selectedAuthor.name);
-      } else {
-        currentNames.push(selectedAuthor.name);
-      }
-
-      const newAuthorName = currentNames.join(', ');
-      
-      // The relation (author_id) will store the first author in the list
-      const firstAuthorName = currentNames[0];
-      const firstAuthor = authors.find(a => a.name === firstAuthorName);
-      
-      return {
-        ...prev,
-        author_name: newAuthorName,
-        author: firstAuthor ? firstAuthor.id : null
-      };
-    });
-  };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center h-64">
+        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10 py-4 pb-20">
+    <div className="space-y-8 max-w-4xl">
+      {/* Header */}
       <header className="flex items-center justify-between">
         <div>
-          <Link href="/admin/books" className="text-teal-600 font-bold flex items-center gap-2 mb-2 hover:translate-x-[-4px] transition-transform">
-            ← Catalogue de livres
+          <Link href="/admin/books" className="text-gray-400 hover:text-teal-600 font-medium text-sm mb-2 inline-flex items-center gap-1 transition-colors">
+            ← Retour aux livres
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isNew ? 'Ajouter un livre' : `Modifier ${book?.title || ''}`}
+            {isNew ? 'Nouveau livre' : `Modifier : ${form.title || '...'}`}
           </h1>
         </div>
       </header>
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-2xl font-medium">
-          {error}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Main Info */}
-        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-8">
-          <h2 className="text-xl font-bold text-gray-800">Informations Principales</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Titre (Français) 🇫🇷</label>
+        {/* Cover + Titres */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cover upload */}
+          <div className="lg:col-span-1">
+            <div
+              className="aspect-[3/4] bg-gray-50 rounded-[24px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-teal-400 hover:bg-teal-50/30 transition-all overflow-hidden relative group"
+              onClick={() => coverInputRef.current?.click()}
+            >
+              {coverPreview ? (
+                <>
+                  <img src={coverPreview} alt="Couverture" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">📸 Changer la couverture</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-4xl mb-3 text-gray-300">📷</div>
+                  <p className="text-gray-400 font-medium text-sm text-center px-4">
+                    Cliquer pour ajouter une couverture
+                  </p>
+                  <p className="text-gray-300 text-xs mt-1">JPG, PNG, WebP</p>
+                </>
+              )}
               <input
-                type="text"
-                name="title"
-                required
-                value={book?.title || ''}
-                onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Slug (URL)</label>
-              <input
-                type="text"
-                name="slug"
-                required
-                value={book?.slug || ''}
-                onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-mono text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Titre (Anglais) 🇬🇧</label>
-              <input
-                type="text"
-                name="title_en"
-                value={book?.title_en || ''}
-                onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Titre (Arabe) 🇹🇳</label>
-              <input
-                type="text"
-                name="title_ar"
-                value={book?.title_ar || ''}
-                onChange={handleChange}
-                dir="rtl"
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverChange}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <label className="text-sm font-bold text-gray-500 ml-1">Sélectionner les auteurs</label>
-              <select
-                name="author_picker"
-                value=""
-                onChange={(e) => { if (e.target.value) toggleAuthor(e.target.value); }}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium appearance-none"
-              >
-                <option value="">
-                  {authorsError ? '⚠️ Erreur chargement des auteurs' : authors.length === 0 ? 'Chargement...' : 'Ajouter un auteur...'}
-                </option>
-                {authors.map((author: any) => (
-                  <option key={author.id} value={author.id}>
-                    {book?.author_name?.includes(author.name) ? `✓ ${author.name}` : author.name}
-                  </option>
-                ))}
-              </select>
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {book.author_name?.split(',').map((name: string) => name.trim()).filter(Boolean).map((name: string) => (
-                  <button 
-                    key={name}
-                    type="button"
-                    onClick={() => {
-                      const a = authors.find(aut => aut.name === name);
-                      if (a) toggleAuthor(a.id);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-xl border border-teal-100 font-bold text-sm hover:bg-teal-100 transition-colors"
-                  >
-                    {name} <span className="text-teal-300">✕</span>
-                  </button>
-                ))}
+          {/* Titres */}
+          <div className="lg:col-span-2 space-y-5">
+            <div className="bg-white rounded-[24px] border border-gray-100 p-6 space-y-4">
+              <h3 className="font-bold text-gray-700 text-sm uppercase tracking-wider">Titres</h3>
+              {[
+                { name: 'title', label: 'Titre (Français) *', required: true },
+                { name: 'title_en', label: 'Titre (English)' },
+                { name: 'title_ar', label: 'العنوان (عربي)', dir: 'rtl' },
+              ].map((field) => (
+                <div key={field.name}>
+                  <label className="text-sm font-semibold text-gray-600 block mb-1">{field.label}</label>
+                  <input
+                    type="text"
+                    name={field.name}
+                    value={(form as any)[field.name]}
+                    onChange={handleChange}
+                    required={field.required}
+                    dir={field.dir}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
+                  />
+                </div>
+              ))}
+              <div>
+                <label className="text-sm font-semibold text-gray-600 block mb-1">Slug (URL)</label>
+                <input
+                  type="text"
+                  name="slug"
+                  value={form.slug}
+                  onChange={handleChange}
+                  placeholder="Généré automatiquement si vide"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700 font-mono text-sm"
+                />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Nom des auteurs (Affichage combiné)</label>
+          </div>
+        </div>
+
+        {/* Auteur + Infos */}
+        <div className="bg-white rounded-[24px] border border-gray-100 p-6 space-y-5">
+          <h3 className="font-bold text-gray-700 text-sm uppercase tracking-wider">Auteur & Informations</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Auteur (de la base)</label>
+              <select
+                name="author"
+                value={form.author}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
+              >
+                <option value="">— Sélectionner un auteur —</option>
+                {authors.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Nom auteur (texte libre)</label>
               <input
                 type="text"
                 name="author_name"
-                readOnly
-                value={book?.author_name || ''}
-                className="w-full px-5 py-4 bg-gray-100 border border-gray-100 rounded-2xl focus:outline-none cursor-not-allowed font-medium text-gray-500"
-                placeholder="Les auteurs sélectionnés apparaîtront ici"
+                value={form.author_name}
+                onChange={handleChange}
+                placeholder="Si l'auteur n'est pas dans la base"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Categories and Prices */}
-        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Catégorie</label>
-              <select
-                name="category"
-                value={book?.category || ''}
-                onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium appearance-none"
-              >
-                <option value="">Sélectionner une catégorie...</option>
-                {APP_CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Prix (DT)</label>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Prix (DT)</label>
               <input
                 type="number"
-                step="0.001"
                 name="price_dt"
-                value={book?.price_dt || ''}
+                value={form.price_dt}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Prix (EUR)</label>
-              <input
-                type="number"
                 step="0.01"
-                name="price_eur"
-                value={book?.price_eur || ''}
-                onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
+                min="0"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Pages</label>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Prix (EUR)</label>
               <input
                 type="number"
-                name="pages"
-                value={book?.pages || ''}
+                name="price_eur"
+                value={form.price_eur}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
+                step="0.01"
+                min="0"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Année</label>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Année</label>
               <input
                 type="number"
                 name="year"
-                value={book?.year || ''}
+                value={form.year}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
+                min="1900"
+                max="2030"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Langue</label>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Pages</label>
+              <input
+                type="number"
+                name="pages"
+                value={form.pages}
+                onChange={handleChange}
+                min="1"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">ISBN</label>
               <input
                 type="text"
-                name="language"
-                value={book?.language || ''}
+                name="isbn"
+                value={form.isbn}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-medium"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
               />
             </div>
-            <div className="flex items-center pt-8 px-4">
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Langue</label>
+              <select
+                name="language"
+                value={form.language}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.value} value={l.value}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">Catégorie</label>
+              <input
+                type="text"
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                placeholder="Roman, Poésie, Essai..."
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700"
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-4">
               <input
                 type="checkbox"
-                id="is_featured"
                 name="is_featured"
-                checked={book.is_featured || false}
+                id="is_featured"
+                checked={form.is_featured}
                 onChange={handleChange}
-                className="w-6 h-6 text-teal-600 bg-gray-100 border-gray-200 rounded-lg focus:ring-teal-500 focus:ring-offset-0"
+                className="w-5 h-5 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
               />
-              <label htmlFor="is_featured" className="ml-3 text-sm font-bold text-gray-700 select-none cursor-pointer">
-                Livre Vedette ⭐
+              <label htmlFor="is_featured" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                ⭐ Mettre en avant sur la page d&apos;accueil
               </label>
             </div>
           </div>
         </div>
 
         {/* Descriptions */}
-        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-8">
-          <h2 className="text-xl font-bold text-gray-800">Résumés & Descriptions</h2>
-          
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Description (Français) 🇫🇷</label>
-              <RichTextEditor
-                name="description"
-                value={book?.description || ''}
+        <div className="bg-white rounded-[24px] border border-gray-100 p-6 space-y-5">
+          <h3 className="font-bold text-gray-700 text-sm uppercase tracking-wider">Descriptions</h3>
+          {[
+            { name: 'description', label: 'Description (Français)' },
+            { name: 'description_en', label: 'Description (English)' },
+            { name: 'description_ar', label: 'الوصف (عربي)', dir: 'rtl' },
+          ].map((field) => (
+            <div key={field.name}>
+              <label className="text-sm font-semibold text-gray-600 block mb-1">{field.label}</label>
+              <textarea
+                name={field.name}
+                value={(form as any)[field.name]}
                 onChange={handleChange}
-                placeholder="Décrivez l'ouvrage en français..."
+                dir={field.dir}
+                rows={4}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-gray-700 resize-none"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1">Description (Anglais) 🇬🇧</label>
-              <RichTextEditor
-                name="description_en"
-                value={book?.description_en || ''}
-                onChange={handleChange}
-                placeholder="English description..."
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-500 ml-1 text-right block">Description (Arabe) 🇹🇳</label>
-              <RichTextEditor
-                name="description_ar"
-                value={book?.description_ar || ''}
-                onChange={handleChange}
-                dir="rtl"
-                placeholder="وصف الكتاب باللغة العربية..."
-              />
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Cover Image */}
-        <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm space-y-4">
-          <h2 className="text-xl font-bold text-gray-800">Couverture du livre</h2>
-          <ImageUploader
-            value={book?.cover || null}
-            onChange={(fileId) => setBook((prev: any) => ({ ...prev, cover: fileId || null }))}
-            label="Image de couverture"
-            hint="Format portrait recommandé (3:4)"
-          />
-        </div>
-
-        <div className="flex items-center justify-end gap-4 pb-20">
-          <Link 
-            href="/admin/books"
-            className="px-8 py-4 bg-white text-gray-500 font-bold rounded-2xl hover:bg-gray-50 border border-gray-100 transition-all"
-          >
-            Annuler
-          </Link>
+        {/* Submit */}
+        <div className="flex items-center gap-4 pb-8">
           <button
             type="submit"
             disabled={saving}
-            className="px-10 py-4 bg-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-teal-500/20 hover:bg-teal-700 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
+            className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-10 py-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all disabled:opacity-50 flex items-center gap-2"
           >
-            {saving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : (isNew ? 'Créer le livre' : 'Enregistrer les modifications')}
+            {saving ? (
+              <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sauvegarde...</>
+            ) : (
+              <>{isNew ? '➕ Créer le livre' : '💾 Sauvegarder les modifications'}</>
+            )}
           </button>
+          <Link href="/admin/books" className="text-gray-400 hover:text-gray-600 font-medium transition-colors">
+            Annuler
+          </Link>
         </div>
       </form>
     </div>

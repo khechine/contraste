@@ -1,4 +1,4 @@
-import { getFeaturedBooks, getHeroSections, getLatestNews, getLatestBook, getAuthorOfTheMonth } from '@/lib/directus';
+import { getFeaturedBooks, getHeroSections, getLatestNews, getLatestBook, getAuthorOfTheMonth } from '@/lib/django';
 import { Locale } from '@/lib/i18n';
 import AnimatedHome from '@/components/AnimatedHome';
 

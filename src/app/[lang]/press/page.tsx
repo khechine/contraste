@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getPressItems } from '@/lib/directus';
+import { getPressItems } from '@/lib/django';
 import { Locale } from '@/lib/i18n';
 import PressCard from '@/components/PressCard';
 import PressSkeleton from '@/components/PressSkeleton';

@@ -3,51 +3,46 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
+import { adminList, adminDelete } from '@/lib/admin-django';
+import { getImageUrl } from '@/lib/django';
 import Link from 'next/link';
 
 export default function PressListPage() {
   const router = useRouter();
   const [press, setPress] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  async function fetchPress() {
+    try {
+      const data = await adminList('press', { ordering: '-publication_date', limit: '500' });
+      setPress(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error('Failed to fetch press items:', err);
+      if (err.message?.includes('401') || err.message?.includes('403')) {
+        router.push('/admin/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchPress() {
-      try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
-
-        if (!user) {
-          router.push('/admin/login');
-          return;
-        }
-
-        // 2. Fetch press
-        const response = await adminDirectus.request(() => ({
-          path: '/items/press',
-          method: 'GET',
-          params: {
-            sort: '-publication_date',
-            fields: 'id,title,media_name,publication_date,featured'
-          }
-        })) as any;
-        setPress(response.data || response || []);
-      } catch (error: any) {
-        console.error('Failed to fetch press items:', error);
-        if (error.status === 401) {
-          router.push('/admin/login');
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchPress();
-  }, [router]);
+  }, []);
+
+  async function handleDelete(id: number, title: string) {
+    if (!confirm(`Supprimer l'article de presse "${title}" ?`)) return;
+    setDeletingId(id);
+    try {
+      await adminDelete('press', id);
+      setPress((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert('Erreur lors de la suppression.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -100,6 +95,7 @@ export default function PressListPage() {
                       key={item?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
                       transition={{ delay: index * 0.05 }}
                       className="hover:bg-gray-50/50 transition-colors group"
                     >
@@ -137,10 +133,14 @@ export default function PressListPage() {
                             ✏️
                           </Link>
                           <button 
-                            className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100"
+                            className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100 disabled:opacity-50"
                             title="Supprimer"
+                            disabled={deletingId === item.id}
+                            onClick={() => handleDelete(item.id, item.title)}
                           >
-                            🗑️
+                            {deletingId === item.id ? (
+                                <span className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin inline-block" />
+                              ) : '🗑️'}
                           </button>
                         </div>
                       </td>

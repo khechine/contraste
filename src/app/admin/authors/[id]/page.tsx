@@ -3,8 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
+import { adminGet, adminCreate, adminUpdate } from '@/lib/admin-django';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
@@ -31,31 +30,18 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     async function fetchAuthor() {
+      if (isNew) return;
       try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
-
-        if (!user) {
-          router.push('/admin/login');
-          return;
-        }
-
-        if (!isNew) {
-          const response = await adminDirectus.request(() => ({
-            path: `/items/authors/${id}`,
-            method: 'GET'
-          })) as any;
-          const data = response.data || response;
-          if (data) {
-            setAuthor((prev: any) => ({ ...prev, ...data }));
-          }
+        const data = await adminGet('authors', id);
+        if (data) {
+          setAuthor({
+              ...data,
+              photo: data.photo_url || data.photo
+          });
         }
       } catch (err: any) {
         console.error('Failed to fetch author:', err);
-        if (err.status === 401) {
+        if (err.message?.includes('401') || err.message?.includes('403')) {
           router.push('/admin/login');
         } else {
           setError("Impossible de charger l'auteur.");
@@ -75,19 +61,13 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
 
     try {
       const payload = { ...author };
-      // Ensure we explicitly map bio_fr if it was renamed in state
+      // Django might expect a relative path or file object for photo if it changed
+      // But since we are using ImageUploader which returns a path, we can send it or the field name
+      
       if (isNew) {
-        await adminDirectus.request(() => ({
-          path: '/items/authors',
-          method: 'POST',
-          body: JSON.stringify(payload)
-        }));
+        await adminCreate('authors', payload);
       } else {
-        await adminDirectus.request(() => ({
-          path: `/items/authors/${id}`,
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        }));
+        await adminUpdate('authors', id, payload);
       }
       router.push('/admin/authors');
     } catch (err: any) {
@@ -128,7 +108,7 @@ export default function AuthorEditorPage({ params }: { params: Promise<{ id: str
       <header className="flex items-center justify-between">
         <div>
           <Link href="/admin/authors" className="text-teal-600 font-bold flex items-center gap-2 mb-2 hover:translate-x-[-4px] transition-transform">
-            ← Paramètres des auteurs
+            ← Liste des auteurs
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">
             {isNew ? 'Créer un nouvel auteur' : `Modifier ${author?.name || ''}`}

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
+import { adminUploadMedia, getAccessToken } from '@/lib/admin-django';
+import { getImageUrl } from '@/lib/django';
 
 interface ImageUploaderProps {
   value: string | null;
@@ -21,34 +21,33 @@ export default function ImageUploader({ value, onChange, label = 'Image', hint }
 
   const previewUrl = value ? getImageUrl(value) : null;
 
-  const BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://directus.contraste.tn';
-
-  const getToken = useCallback(async () => {
-    return await adminDirectus.getToken();
-  }, []);
+  const BASE_URL = process.env.NEXT_PUBLIC_DJANGO_URL || 'http://localhost:8000';
 
   // Load gallery when picker is opened
   useEffect(() => {
     if (!pickerOpen) return;
     setGalleryLoading(true);
 
-    getToken().then(async (token) => {
-      if (!token) { setGalleryLoading(false); return; }
-      try {
-        const res = await fetch(`${BASE_URL}/files?sort=-uploaded_on&filter[type][_starts_with]=image/&limit=100`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setGalleryFiles(data?.data || []);
-        }
-      } catch (e) {
-        console.error('Gallery load failed:', e);
-      } finally {
+    const token = getAccessToken();
+    if (!token) {
         setGalleryLoading(false);
-      }
-    });
-  }, [pickerOpen, BASE_URL, getToken]);
+        return;
+    }
+
+    try {
+        fetch(`${BASE_URL}/api/v1/media/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            setGalleryFiles(data?.results || []);
+        })
+        .catch(e => console.error('Gallery load failed:', e))
+        .finally(() => setGalleryLoading(false));
+    } catch (e) {
+        setGalleryLoading(false);
+    }
+  }, [pickerOpen, BASE_URL]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -58,25 +57,10 @@ export default function ImageUploader({ value, onChange, label = 'Image', hint }
     setError('');
 
     try {
-      const token = await getToken();
-      if (!token) { setError('Session expirée. Veuillez vous reconnecter.'); return; }
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch(`${BASE_URL}/files`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
-      });
-
-      if (res.status === 403) { setError('Permission refusée.'); return; }
-      if (!res.ok) { setError(`Erreur upload (HTTP ${res.status}).`); return; }
-
-      const data = await res.json();
-      const fileId = data?.data?.id || data?.id;
-      if (fileId) onChange(fileId);
-      else setError("Impossible de récupérer l'ID du fichier.");
+      const data = await adminUploadMedia(file);
+      const filePath = data?.path;
+      if (filePath) onChange(filePath);
+      else setError("Impossible de récupérer le chemin du fichier.");
     } catch (err) {
       setError("Erreur réseau lors de l'upload.");
     } finally {
@@ -85,8 +69,8 @@ export default function ImageUploader({ value, onChange, label = 'Image', hint }
     }
   }
 
-  function selectFromGallery(fileId: string) {
-    onChange(fileId);
+  function selectFromGallery(filePath: string) {
+    onChange(filePath);
     setPickerOpen(false);
   }
 
@@ -178,26 +162,26 @@ export default function ImageUploader({ value, onChange, label = 'Image', hint }
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                   {galleryFiles.map((file: any) => (
                     <button
-                      key={file.id}
+                      key={file.path}
                       type="button"
-                      onClick={() => selectFromGallery(file.id)}
+                      onClick={() => selectFromGallery(file.path)}
                       className={`group relative aspect-square rounded-2xl overflow-hidden border-2 transition-all hover:scale-105 hover:shadow-lg  ${
-                        value === file.id ? 'border-teal-500 ring-2 ring-teal-500/30' : 'border-gray-100 hover:border-teal-400'
+                        value === file.path ? 'border-teal-500 ring-2 ring-teal-500/30' : 'border-gray-100 hover:border-teal-400'
                       }`}
                     >
                       <img
-                        src={getImageUrl(file.id) || ''}
-                        alt={file.title || file.filename_download || ''}
+                        src={file.url || ''}
+                        alt={file.name || ''}
                         className="w-full h-full object-cover"
                       />
-                      {value === file.id && (
+                      {value === file.path && (
                         <div className="absolute inset-0 bg-teal-500/20 flex items-center justify-center">
-                          <span className="text-2xl">✓</span>
+                          <span className="text-white text-2xl">✓</span>
                         </div>
                       )}
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         <p className="text-[9px] text-white font-medium truncate">
-                          {file.title || file.filename_download || '-'}
+                          {file.name || '-'}
                         </p>
                       </div>
                     </button>

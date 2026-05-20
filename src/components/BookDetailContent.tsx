@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Author, Book } from '@/lib/types';
 import { Locale, getLocalizedField, getBooksRoute, getAuthorsRoute } from '@/lib/i18n';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import OrderFormModal from './OrderFormModal';

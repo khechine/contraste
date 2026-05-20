@@ -2,8 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { adminLogout } from '@/lib/admin-django';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: '📊' },
@@ -12,10 +13,17 @@ const navigation = [
   { name: 'Actualités', href: '/admin/news', icon: '📰' },
   { name: 'Presse', href: '/admin/press', icon: '📽️' },
   { name: 'Galerie Média', href: '/admin/media', icon: '🖼️' },
+  { name: 'Hero Sections', href: '/admin/hero', icon: '🖼️' },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await adminLogout();
+    router.push('/admin/login');
+  }
 
   return (
     <div className="flex flex-col md:w-64 bg-white border-b md:border-r border-gray-100 md:h-screen md:sticky top-0 z-40">
@@ -25,10 +33,7 @@ export default function AdminSidebar() {
         </Link>
         <button 
             className="md:hidden text-xs text-red-500 font-semibold px-3 py-1 bg-red-50 rounded-lg whitespace-nowrap"
-            onClick={() => {
-              localStorage.removeItem('directus_auth_token');
-              window.location.href = '/admin/login';
-            }}
+            onClick={handleLogout}
           >
             Quitter
         </button>
@@ -66,16 +71,21 @@ export default function AdminSidebar() {
 
       <div className="hidden md:block p-4 border-t border-gray-50 mt-auto">
         <div className="bg-gray-50 rounded-2xl p-4">
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Système</p>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Système (Django)</p>
           <button 
             className="w-full text-left text-sm text-gray-600 hover:text-red-500 transition-colors py-1"
-            onClick={() => {
-              localStorage.removeItem('directus_auth_token');
-              window.location.href = '/admin/login';
-            }}
+            onClick={handleLogout}
           >
             Quitter la session
           </button>
+          <a 
+            href={`${process.env.NEXT_PUBLIC_DJANGO_URL || 'http://localhost:8000'}/django-admin/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-left text-[10px] text-gray-400 hover:text-teal-500 transition-colors py-1 mt-2 font-bold"
+          >
+            → Super-Admin
+          </a>
         </div>
       </div>
     </div>

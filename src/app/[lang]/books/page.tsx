@@ -1,4 +1,4 @@
-import { getBooks } from '@/lib/directus';
+import { getBooks } from '@/lib/django';
 import { Locale } from '@/lib/i18n';
 import AnimatedBooks from '@/components/AnimatedBooks';
 

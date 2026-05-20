@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getBook, getBookBySlug, getBooks, getAuthors } from '@/lib/directus';
+import { getBook, getBookBySlug, getBooks, getAuthors } from '@/lib/django';
 import { Locale, getLocalizedField } from '@/lib/i18n';
 import BookDetailContent from '@/components/BookDetailContent';
 

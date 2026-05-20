@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
+import { adminList, adminDelete } from '@/lib/admin-django';
+import { getImageUrl } from '@/lib/django';
 import Link from 'next/link';
 
 export default function AuthorsListPage() {
@@ -12,43 +12,38 @@ export default function AuthorsListPage() {
   const [authors, setAuthors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  async function fetchAuthors() {
+    try {
+      const data = await adminList('authors', { ordering: 'name', limit: '500' });
+      setAuthors(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error('Failed to fetch authors:', err);
+      if (err.message?.includes('401') || err.message?.includes('403')) {
+        router.push('/admin/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchAuthors() {
-      try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
-
-        if (!user) {
-          router.push('/admin/login');
-          return;
-        }
-
-        // 2. Fetch authors
-        const response = await adminDirectus.request(() => ({
-          path: '/items/authors',
-          method: 'GET',
-          params: {
-            sort: 'name',
-            fields: 'id,name,slug,photo'
-          }
-        })) as any;
-        setAuthors(response.data || response || []);
-      } catch (error: any) {
-        console.error('Failed to fetch authors:', error);
-        if (error.status === 401) {
-          router.push('/admin/login');
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchAuthors();
-  }, [router]);
+  }, []);
+
+  async function handleDelete(id: number, name: string) {
+    if (!confirm(`Supprimer l'auteur "${name}" ? Cette action entraînera le détachement de ses livres.`)) return;
+    setDeletingId(id);
+    try {
+      await adminDelete('authors', id);
+      setAuthors((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      alert('Erreur lors de la suppression.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const filteredAuthors = (authors || []).filter(author => 
     author?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -78,7 +73,7 @@ export default function AuthorsListPage() {
           placeholder="Rechercher un auteur par son nom..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 shadow-sm shadow-gray-200/50 transition-all placeholder-gray-300 font-medium"
+          className="w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 shadow-sm transition-all placeholder-gray-300 font-medium"
         />
       </div>
 
@@ -119,15 +114,16 @@ export default function AuthorsListPage() {
                       key={author?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
                       transition={{ delay: index * 0.05 }}
                       className="hover:bg-gray-50/50 transition-colors group"
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {author?.photo ? (
+                            {author?.photo_url ? (
                               <img 
-                                src={getImageUrl(author.photo) || '/placeholder.png'} 
+                                src={author.photo_url} 
                                 alt={author?.name || 'Auteur'}
                                 className="w-full h-full object-cover"
                               />
@@ -137,9 +133,14 @@ export default function AuthorsListPage() {
                               </div>
                             )}
                           </div>
-                          <Link href={`/admin/authors/${author?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
-                            {author?.name || 'Sans nom'}
-                          </Link>
+                          <div className="flex flex-col">
+                            <Link href={`/admin/authors/${author?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
+                              {author?.name || 'Sans nom'}
+                            </Link>
+                            {author?.is_author_of_month && (
+                              <span className="text-xs text-teal-600 font-bold">⭐ Auteur du mois</span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-8 py-6 hidden md:table-cell">
@@ -147,7 +148,7 @@ export default function AuthorsListPage() {
                           {author?.slug || 'no-slug'}
                         </span>
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-3">
                           <Link 
                             href={`/admin/authors/${author?.id}`}
@@ -159,13 +160,12 @@ export default function AuthorsListPage() {
                           <button 
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100"
                             title="Supprimer"
-                            onClick={() => {
-                              if (author?.id && confirm(`Voulez-vous vraiment supprimer l'auteur "${author.name}" ?`)) {
-                                // Delete logic
-                              }
-                            }}
+                            disabled={deletingId === author.id}
+                            onClick={() => handleDelete(author.id, author.name)}
                           >
-                            🗑️
+                            {deletingId === author.id ? (
+                                <span className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin inline-block" />
+                              ) : '🗑️'}
                           </button>
                         </div>
                       </td>
@@ -176,6 +176,12 @@ export default function AuthorsListPage() {
             </tbody>
           </table>
         </div>
+        {!loading && filteredAuthors.length === 0 && (
+          <div className="p-20 text-center">
+            <div className="text-6xl mb-4 opacity-20 text-gray-400">🔍</div>
+            <h3 className="text-xl font-bold text-gray-400">Aucun auteur trouvé</h3>
+          </div>
+        )}
       </div>
     </div>
   );

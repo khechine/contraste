@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Book } from '@/lib/types';
 import { Locale, getLocalizedField, getBooksRoute } from '@/lib/i18n';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 
 interface LatestBookShowcaseProps {
   book: Book | null;

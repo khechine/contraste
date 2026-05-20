@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHeroAdminSection, getHeroAdminSections } from '@/lib/directus-admin';
+import { createHeroAdminSection, getHeroAdminSections } from '@/lib/django-admin';
 
 export async function GET(_: NextRequest) {
   try {

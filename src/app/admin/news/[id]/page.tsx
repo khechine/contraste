@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { adminDirectus } from '@/lib/admin-directus';
+import { adminGet, adminCreate, adminUpdate } from '@/lib/admin-django';
 import { slugify } from '@/lib/utils';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
@@ -30,31 +30,18 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     async function fetchNews() {
+      if (isNew) return;
       try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
-
-        if (!user) {
-          router.push('/admin/login');
-          return;
-        }
-
-        if (!isNew) {
-          const response = await adminDirectus.request(() => ({
-            path: `/items/news/${id}`,
-            method: 'GET'
-          })) as any;
-          const data = response.data || response;
-          if (data) {
-            setNews((prev: any) => ({ ...prev, ...data }));
-          }
+        const data = await adminGet('news', id);
+        if (data) {
+          setNews({
+              ...data,
+              image: data.image_url || data.image
+          });
         }
       } catch (err: any) {
         console.error('Failed to fetch news:', err);
-        if (err.status === 401) {
+        if (err.message?.includes('401') || err.message?.includes('403')) {
           router.push('/admin/login');
         } else {
           setError("Impossible de charger l'article.");
@@ -75,17 +62,9 @@ export default function NewsEditorPage({ params }: { params: Promise<{ id: strin
     try {
       const payload = { ...news };
       if (isNew) {
-        await adminDirectus.request(() => ({
-          path: '/items/news',
-          method: 'POST',
-          body: JSON.stringify(payload)
-        }));
+        await adminCreate('news', payload);
       } else {
-        await adminDirectus.request(() => ({
-          path: `/items/news/${id}`,
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        }));
+        await adminUpdate('news', id, payload);
       }
       router.push('/admin/news');
     } catch (err: any) {

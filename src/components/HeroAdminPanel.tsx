@@ -2,20 +2,21 @@
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { adminDirectus } from '@/lib/admin-directus';
+import { adminList, adminCreate, adminUpdate, adminDelete, isAuthenticated } from '@/lib/admin-django';
 import { HeroSection } from '@/lib/types';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 interface HeroFormState {
-  title_fr: string;
+  title: string;
   title_en: string;
   title_ar: string;
-  subtitle_fr: string;
+  subtitle: string;
   subtitle_en: string;
   subtitle_ar: string;
-  description_fr: string;
+  description: string;
   description_en: string;
   description_ar: string;
-  cta_label_fr: string;
+  cta_label: string;
   cta_label_en: string;
   cta_label_ar: string;
   cta_url: string;
@@ -25,16 +26,16 @@ interface HeroFormState {
 }
 
 const defaultFormState: HeroFormState = {
-  title_fr: '',
+  title: '',
   title_en: '',
   title_ar: '',
-  subtitle_fr: '',
+  subtitle: '',
   subtitle_en: '',
   subtitle_ar: '',
-  description_fr: '',
+  description: '',
   description_en: '',
   description_ar: '',
-  cta_label_fr: '',
+  cta_label: '',
   cta_label_en: '',
   cta_label_ar: '',
   cta_url: '',
@@ -42,27 +43,6 @@ const defaultFormState: HeroFormState = {
   type: 'book',
   order: '0',
 };
-
-function buildPayload(form: HeroFormState) {
-  return {
-    title: form.title_fr,
-    title_en: form.title_en,
-    title_ar: form.title_ar,
-    subtitle: form.subtitle_fr,
-    subtitle_en: form.subtitle_en,
-    subtitle_ar: form.subtitle_ar,
-    description: form.description_fr,
-    description_en: form.description_en,
-    description_ar: form.description_ar,
-    cta_label: form.cta_label_fr,
-    cta_label_en: form.cta_label_en,
-    cta_label_ar: form.cta_label_ar,
-    cta_url: form.cta_url,
-    image: form.image || null,
-    type: form.type,
-    order: Number(form.order),
-  };
-}
 
 export default function HeroAdminPanel() {
   const router = useRouter();
@@ -73,17 +53,11 @@ export default function HeroAdminPanel() {
 
   useEffect(() => {
     async function init() {
-       // 1. Auth check
-       const user = await adminDirectus.request(() => ({
-         path: '/users/me',
-         method: 'GET',
-       })).catch(() => null);
-
-       if (!user) {
+       const ok = await isAuthenticated();
+       if (!ok) {
          router.push('/admin/login');
          return;
        }
-
        await loadHeroSections();
     }
     init();
@@ -91,16 +65,11 @@ export default function HeroAdminPanel() {
 
   async function loadHeroSections() {
     try {
-      const response = await fetch('/api/admin/hero');
-      if (response.status === 401) {
-        router.push('/admin/login');
-        return;
-      }
-      if (!response.ok) throw new Error('Impossible de charger les héros.');
-      const data = await response.json();
+      const data = await adminList('hero-sections', { ordering: 'order' });
       setHeroSections(data || []);
       setStatus('');
     } catch (error) {
+      console.error(error);
       setStatus('Erreur lors du chargement des sections hero.');
     }
   }
@@ -110,22 +79,15 @@ export default function HeroAdminPanel() {
     setStatus(selectedId ? 'Mise à jour en cours...' : 'Création en cours...');
 
     try {
-      const payload = buildPayload(formState);
-      const method = selectedId ? 'PATCH' : 'POST';
-      const url = selectedId ? `/api/admin/hero/${selectedId}` : '/api/admin/hero';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const payload = {
+          ...formState,
+          order: Number(formState.order) || 0
+      };
 
-      if (response.status === 401) {
-        router.push('/admin/login');
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Échec de la sauvegarde.');
+      if (selectedId) {
+        await adminUpdate('hero-sections', selectedId, payload);
+      } else {
+        await adminCreate('hero-sections', payload);
       }
 
       await loadHeroSections();
@@ -142,44 +104,35 @@ export default function HeroAdminPanel() {
     setFormState((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleEdit(hero: HeroSection) {
+  function handleEdit(hero: any) {
     setSelectedId(hero.id);
     setFormState({
-      title_fr: hero.title || '',
+      title: hero.title || '',
       title_en: hero.title_en || '',
       title_ar: hero.title_ar || '',
-      subtitle_fr: hero.subtitle || '',
+      subtitle: hero.subtitle || '',
       subtitle_en: hero.subtitle_en || '',
       subtitle_ar: hero.subtitle_ar || '',
-      description_fr: hero.description || '',
+      description: hero.description || '',
       description_en: hero.description_en || '',
       description_ar: hero.description_ar || '',
-      cta_label_fr: hero.cta_label || '',
+      cta_label: hero.cta_label || '',
       cta_label_en: hero.cta_label_en || '',
       cta_label_ar: hero.cta_label_ar || '',
       cta_url: hero.cta_url || '',
-      image: hero.image || '',
+      image: hero.image_url || hero.image || '',
       type: hero.type || 'book',
       order: hero.order?.toString() || '0',
     });
     setStatus('Modification de la section hero');
   }
 
-  async function handleDelete(id: number) {
+  async function handleDeleteHero(id: number) {
     if (!confirm('Supprimer cette section hero ?')) return;
     setStatus('Suppression en cours...');
 
     try {
-      const response = await fetch(`/api/admin/hero/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.status === 401) {
-        router.push('/admin/login');
-        return;
-      }
-
-      if (!response.ok) throw new Error('Impossible de supprimer.');
+      await adminDelete('hero-sections', id);
       await loadHeroSections();
       setStatus('Section hero supprimée.');
       if (selectedId === id) {
@@ -193,36 +146,39 @@ export default function HeroAdminPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-8 shadow-sm">
+      <div className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold">Gestion des sections hero</h1>
-            <p className="mt-1 text-sm text-slate-500">Créer, modifier ou supprimer les hero cards.</p>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">Gestion des sections hero</h1>
+            <p className="mt-1 text-sm text-gray-400 font-medium">Bannières rotatives de la page d&apos;accueil</p>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-600 self-start sm:self-auto">{status || 'Prêt'}</span>
+          <span className="rounded-full bg-teal-50 px-4 py-1.5 text-xs font-bold text-teal-600 border border-teal-100">{status || 'Prêt'}</span>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">Sections hero existantes</h2>
-          <div className="space-y-3">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+        <section className="rounded-[32px] border border-gray-100 bg-white p-6 shadow-sm overflow-hidden">
+          <h2 className="text-lg font-bold text-gray-800 mb-6">Sections existantes</h2>
+          <div className="space-y-4">
             {(heroSections || []).length === 0 ? (
-              <p className="text-sm text-slate-500">Aucune section hero trouvée.</p>
+              <p className="text-sm text-gray-400 text-center py-10 italic">Aucune section hero trouvée.</p>
             ) : (
               (heroSections || []).map((hero) => (
-                <div key={hero?.id || Math.random()} className="rounded-xl border border-slate-200 p-3 sm:p-4">
-                  <div className="flex flex-col gap-3">
+                <div key={hero.id} className="rounded-2xl border border-gray-50 p-4 hover:border-teal-100 transition-all bg-gray-50/30">
+                  <div className="flex flex-col gap-4">
                     <div>
-                      <p className="text-xs sm:text-sm text-slate-500">ID {hero?.id} · {hero?.type || 'general'}</p>
-                      <h3 className="font-medium mt-1 text-sm sm:text-base">{hero?.title || hero?.title_en || hero?.title_ar || 'Sans titre'}</h3>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-1">{hero?.cta_url || 'Pas de lien'} · ordre {hero?.order ?? 0}</p>
+                      <div className="flex items-center justify-between mb-2">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">ID {hero.id} · {hero.type}</span>
+                         <span className="text-[10px] font-black text-teal-500">Ordre: {hero.order}</span>
+                      </div>
+                      <h3 className="font-bold text-gray-800">{hero.title || 'Sans titre'}</h3>
+                      <p className="text-xs text-gray-400 mt-1 truncate">{hero.cta_url || 'Pas de lien'}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button className="flex-1 sm:flex-none rounded-xl border border-slate-300 px-4 py-2.5 sm:py-1.5 text-sm text-slate-700 hover:bg-slate-100 min-h-[44px]" onClick={() => handleEdit(hero)}>
+                      <button className="flex-1 rounded-xl bg-white border border-gray-100 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-teal-50 hover:text-teal-600 transition-all" onClick={() => handleEdit(hero)}>
                         Modifier
                       </button>
-                      <button className="flex-1 sm:flex-none rounded-xl border border-rose-300 px-4 py-2.5 sm:py-1.5 text-sm text-rose-700 hover:bg-rose-50 min-h-[44px]" onClick={() => handleDelete(hero?.id)}>
+                      <button className="flex-1 rounded-xl bg-white border border-gray-100 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-50 hover:text-red-600 transition-all" onClick={() => handleDeleteHero(hero.id)}>
                         Supprimer
                       </button>
                     </div>
@@ -233,73 +189,77 @@ export default function HeroAdminPanel() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">Formulaire</h2>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+        <section className="rounded-[32px] border border-gray-100 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-gray-800 mb-6">{selectedId ? 'Modifier la section' : 'Nouvelle section'}</h2>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
-                <span className="text-sm font-medium">Titre FR</span>
-                <input name="title_fr" value={formState.title_fr} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
+                <span className="text-xs font-bold text-gray-500 ml-1">Titre (FR)</span>
+                <input name="title" value={formState.title} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" />
               </label>
               <label className="block">
-                <span className="text-sm font-medium">Titre EN</span>
-                <input name="title_en" value={formState.title_en} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
+                <span className="text-xs font-bold text-gray-500 ml-1">Titre (EN)</span>
+                <input name="title_en" value={formState.title_en} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" />
+              </label>
+               <label className="block sm:col-span-2">
+                <span className="text-xs font-bold text-gray-500 ml-1 block text-right">العنوان (عربي)</span>
+                <input name="title_ar" value={formState.title_ar} onChange={handleChange} dir="rtl" className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" />
               </label>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
-                <span className="text-sm font-medium">Sous-titre FR</span>
-                <input name="subtitle_fr" value={formState.subtitle_fr} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
+                <span className="text-xs font-bold text-gray-500 ml-1">Sous-titre (FR)</span>
+                <input name="subtitle" value={formState.subtitle} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" />
               </label>
               <label className="block">
-                <span className="text-sm font-medium">Sous-titre EN</span>
-                <input name="subtitle_en" value={formState.subtitle_en} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
+                <span className="text-xs font-bold text-gray-500 ml-1">Ordre d&apos;affichage</span>
+                <input type="number" name="order" value={formState.order} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" />
               </label>
             </div>
 
             <label className="block">
-              <span className="text-sm font-medium">Description FR</span>
-              <textarea name="description_fr" value={formState.description_fr} onChange={handleChange} rows={3} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">Description EN</span>
-              <textarea name="description_en" value={formState.description_en} onChange={handleChange} rows={3} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
+              <span className="text-xs font-bold text-gray-500 ml-1">Description (FR)</span>
+              <textarea name="description" value={formState.description} onChange={handleChange} rows={2} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all resize-none" />
             </label>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
-                <span className="text-sm font-medium">CTA label FR</span>
-                <input name="cta_label_fr" value={formState.cta_label_fr} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
+                <span className="text-xs font-bold text-gray-500 ml-1">CTA Label (FR)</span>
+                <input name="cta_label" value={formState.cta_label} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" />
               </label>
               <label className="block">
-                <span className="text-sm font-medium">CTA label EN</span>
-                <input name="cta_label_en" value={formState.cta_label_en} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" />
-              </label>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-medium">URL CTA</span>
-                <input name="cta_url" value={formState.cta_url} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm" placeholder="/fr/livres/mon-livre" />
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium">Type</span>
-                <select name="type" value={formState.type} onChange={handleChange} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 sm:py-2 text-base sm:text-sm">
-                  <option value="book">Book</option>
-                  <option value="news">News</option>
-                  <option value="general">General</option>
+                <span className="text-xs font-bold text-gray-500 ml-1">Type</span>
+                <select name="type" value={formState.type} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all">
+                  <option value="book">Livre (Lien vers un livre)</option>
+                  <option value="news">Actu (Lien vers un article)</option>
+                  <option value="author">Auteur (Focus auteur)</option>
+                  <option value="general">Général (Lien externe/manuel)</option>
                 </select>
               </label>
             </div>
 
-            <div className="grid gap-3 sm:flex sm:flex-wrap">
-              <button type="submit" className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3.5 sm:py-3 text-base sm:text-sm font-semibold text-white hover:bg-slate-800 min-h-[50px] sm:min-h-[44px]">
-                {selectedId ? 'Mettre à jour' : 'Créer la section'}
+            <label className="block">
+               <span className="text-xs font-bold text-gray-500 ml-1">Lien du bouton (URL)</span>
+               <input name="cta_url" value={formState.cta_url} onChange={handleChange} className="mt-1.5 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all" placeholder="/fr/books/le-slug" />
+            </label>
+
+            <ImageUploader 
+               value={formState.image} 
+               onChange={(val) => setFormState(prev => ({ ...prev, image: val || '' }))} 
+               label="Image de fond"
+               hint="Format paysage recommandé"
+            />
+
+            <div className="flex flex-wrap gap-3 pt-4">
+              <button type="submit" className="flex-1 rounded-2xl bg-teal-600 px-6 py-4 text-sm font-bold text-white hover:bg-teal-700 shadow-lg shadow-teal-500/20 active:scale-95 transition-all">
+                {selectedId ? '💾 Enregistrer' : '➕ Créer la section'}
               </button>
-              <button type="button" className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 px-6 py-3.5 sm:py-3 text-base sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 min-h-[50px] sm:min-h-[44px]" onClick={() => { setSelectedId(null); setFormState(defaultFormState); setStatus('Formulaire réinitialisé.'); }}>
-                Annuler
-              </button>
+              {selectedId && (
+                  <button type="button" className="rounded-2xl border border-gray-200 px-6 py-4 text-sm font-bold text-gray-400 hover:bg-gray-50 transition-all" onClick={() => { setSelectedId(null); setFormState(defaultFormState); setStatus('Annulé.'); }}>
+                    Annuler
+                  </button>
+              )}
             </div>
           </form>
         </section>

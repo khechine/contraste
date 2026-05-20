@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { adminDirectus } from '@/lib/admin-directus';
+import { isAuthenticated, adminLogout } from '@/lib/admin-django';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -18,24 +18,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return;
       }
 
-      try {
-        // Try to fetch current user to verify token
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        }));
-        
-        if (user) {
-          setAuthorized(true);
-        } else {
-          router.push('/admin/login');
-        }
-      } catch (error) {
-        console.error('Admin Auth Check Failed:', error);
+      const ok = await isAuthenticated();
+      if (ok) {
+        setAuthorized(true);
+      } else {
         router.push('/admin/login');
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     }
 
     checkAuth();
@@ -46,21 +35,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="flex flex-col items-center">
           <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4 shadow-xl shadow-teal-500/20"></div>
-          <p className="text-gray-400 font-medium animate-pulse">Chargement de l'espace admin...</p>
+          <p className="text-gray-400 font-medium animate-pulse">Chargement de l&apos;espace admin...</p>
         </div>
       </div>
     );
   }
 
-  // If we're on the login page, just show the login page content
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  // If we're not authorized yet (and not loading), we'll be redirected anyway
-  if (!authorized) {
-    return null;
-  }
+  if (!authorized) return null;
 
   return (
     <div className="flex flex-col md:flex-row bg-gray-50 min-h-screen text-gray-900 overflow-x-hidden">

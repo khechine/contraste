@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Press } from '@/lib/types';
 import { Locale } from '@/lib/i18n';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 
 interface PressCardProps {
   item: Press;

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 
-import { getNewsItemBySlug, getImageUrl } from '@/lib/directus';
+import { getNewsItemBySlug, getImageUrl } from '@/lib/django';
 import { Locale, getLocalizedField } from '@/lib/i18n';
 import Link from 'next/link';
 

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
+import { adminList, adminDelete } from '@/lib/admin-django';
+import { getImageUrl } from '@/lib/django';
 import Link from 'next/link';
 
 export default function BooksListPage() {
@@ -12,47 +12,45 @@ export default function BooksListPage() {
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  async function fetchBooks() {
+    try {
+      const data = await adminList('books', { ordering: '-id', limit: '500' });
+      setBooks(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error('Failed to fetch books:', err);
+      if (err.message?.includes('401') || err.message?.includes('403')) {
+        router.push('/admin/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchBooks() {
-      try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
-
-        if (!user) {
-          router.push('/admin/login');
-          return;
-        }
-
-        // 2. Fetch books
-        const response = await adminDirectus.request(() => ({
-          path: '/items/books',
-          method: 'GET',
-          params: {
-            sort: '-id',
-            fields: 'id,title,slug,cover,author_name,category,price_dt'
-          }
-        })) as any;
-        setBooks(response.data || response || []);
-      } catch (error: any) {
-        console.error('Failed to fetch books:', error);
-        if (error.status === 401) {
-          router.push('/admin/login');
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchBooks();
-  }, [router]);
+  }, []);
 
-  const filteredBooks = (books || []).filter(book => 
-    book?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book?.author_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  async function handleDelete(id: number, title: string) {
+    if (!confirm(`Supprimer le livre "${title}" ? Cette action est irréversible.`)) return;
+    setDeletingId(id);
+    try {
+      await adminDelete('books', id);
+      setBooks((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      alert('Erreur lors de la suppression.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  const filteredBooks = books.filter(
+    (book) =>
+      book?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (book?.author_name_display || book?.author_name || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -60,9 +58,11 @@ export default function BooksListPage() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Bibliothèque</h1>
-          <p className="text-gray-500 font-medium">Gérez votre catalogue de livres, prix et métadonnées.</p>
+          <p className="text-gray-500 font-medium">
+            {loading ? '...' : `${books.length} livre${books.length > 1 ? 's' : ''} dans le catalogue`}
+          </p>
         </div>
-        <Link 
+        <Link
           href="/admin/books/new"
           className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2"
         >
@@ -79,7 +79,7 @@ export default function BooksListPage() {
           placeholder="Rechercher par titre ou auteur..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 shadow-sm shadow-gray-200/50 transition-all placeholder-gray-300 font-medium"
+          className="w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 shadow-sm transition-all placeholder-gray-300 font-medium"
         />
       </div>
 
@@ -122,20 +122,21 @@ export default function BooksListPage() {
                     </tr>
                   ))
                 ) : (
-                  (filteredBooks || []).map((book, index) => (
-                    <motion.tr 
+                  filteredBooks.map((book, index) => (
+                    <motion.tr
                       key={book?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ delay: index * 0.03 }}
                       className="hover:bg-gray-50/50 transition-colors group"
                     >
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-4 text-balanced">
-                          <div className="w-14 h-20 rounded-xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {book?.cover ? (
-                              <img 
-                                src={getImageUrl(book.cover) || '/placeholder-book.png'} 
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-20 rounded-xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-105 transition-transform border border-gray-100">
+                            {book?.cover_url ? (
+                              <img
+                                src={book.cover_url}
                                 alt={book?.title || 'Livre'}
                                 className="w-full h-full object-cover"
                               />
@@ -146,10 +147,18 @@ export default function BooksListPage() {
                             )}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <Link href={`/admin/books/${book?.id}`} className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1">
+                            <Link
+                              href={`/admin/books/${book?.id}`}
+                              className="font-bold text-gray-800 hover:text-teal-600 transition-colors line-clamp-1"
+                            >
                               {book?.title || 'Sans titre'}
                             </Link>
-                            <span className="text-sm text-gray-400 font-medium line-clamp-1">{book?.author_name || 'Auteur inconnu'}</span>
+                            <span className="text-sm text-gray-400 font-medium line-clamp-1">
+                              {book?.author_name_display || book?.author_name || 'Auteur inconnu'}
+                            </span>
+                            {book?.is_featured && (
+                              <span className="text-xs text-teal-600 font-bold mt-0.5">⭐ Mis en avant</span>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -165,18 +174,22 @@ export default function BooksListPage() {
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-3">
-                          <Link 
+                          <Link
                             href={`/admin/books/${book?.id}`}
                             className="p-3 bg-gray-50 text-gray-500 hover:bg-teal-50 hover:text-teal-600 rounded-xl transition-all font-bold border border-gray-100"
                             title="Modifier"
                           >
                             ✏️
                           </Link>
-                          <button 
-                            className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100"
+                          <button
+                            onClick={() => handleDelete(book.id, book.title)}
+                            disabled={deletingId === book.id}
+                            className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100 disabled:opacity-50"
                             title="Supprimer"
                           >
-                            🗑️
+                            {deletingId === book.id ? (
+                              <span className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin inline-block" />
+                            ) : '🗑️'}
                           </button>
                         </div>
                       </td>
@@ -187,12 +200,15 @@ export default function BooksListPage() {
             </tbody>
           </table>
         </div>
-        
+
         {!loading && filteredBooks.length === 0 && (
           <div className="p-20 text-center">
             <div className="text-6xl mb-4 opacity-20 text-gray-400">🔍</div>
             <h3 className="text-xl font-bold text-gray-400">Aucun livre trouvé</h3>
             <p className="text-gray-300">Réduisez vos filtres ou créez votre premier livre.</p>
+            <Link href="/admin/books/new" className="mt-4 inline-block bg-teal-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-teal-700 transition-colors">
+              + Ajouter un livre
+            </Link>
           </div>
         )}
       </div>

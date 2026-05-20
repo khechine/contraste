@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteHeroAdminSection, updateHeroAdminSection } from '@/lib/directus-admin';
+import { deleteHeroAdminSection, updateHeroAdminSection } from '@/lib/django-admin';
 
 interface Params {
   params: Promise<{ id: string }>;

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { adminDirectus } from '@/lib/admin-directus';
-import { getImageUrl } from '@/lib/directus';
+import { adminList, adminDelete } from '@/lib/admin-django';
+import { getImageUrl } from '@/lib/django';
 import Link from 'next/link';
 
 export default function NewsListPage() {
@@ -12,43 +12,38 @@ export default function NewsListPage() {
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  async function fetchNews() {
+    try {
+      const data = await adminList('news', { ordering: '-date', limit: '500' });
+      setNews(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error('Failed to fetch news:', err);
+      if (err.message?.includes('401') || err.message?.includes('403')) {
+        router.push('/admin/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchNews() {
-      try {
-        // 1. Auth check
-        const user = await adminDirectus.request(() => ({
-          path: '/users/me',
-          method: 'GET',
-        })).catch(() => null);
-
-        if (!user) {
-          router.push('/admin/login');
-          return;
-        }
-
-        // 2. Fetch news
-        const response = await adminDirectus.request(() => ({
-          path: '/items/news',
-          method: 'GET',
-          params: {
-            sort: '-date',
-            fields: 'id,title,slug,image,date'
-          }
-        })) as any;
-        setNews(response.data || response || []);
-      } catch (error: any) {
-        console.error('Failed to fetch news:', error);
-        if (error.status === 401) {
-          router.push('/admin/login');
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchNews();
-  }, [router]);
+  }, []);
+
+  async function handleDelete(id: number, title: string) {
+    if (!confirm(`Supprimer l'article "${title}" ?`)) return;
+    setDeletingId(id);
+    try {
+      await adminDelete('news', id);
+      setNews((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      alert('Erreur lors de la suppression.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const filteredNews = (news || []).filter(item => 
     item?.title?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -78,7 +73,7 @@ export default function NewsListPage() {
           placeholder="Rechercher par titre..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 shadow-sm shadow-gray-200/50 transition-all placeholder-gray-300 font-medium"
+          className="w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-[24px] focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 shadow-sm transition-all placeholder-gray-300 font-medium"
         />
       </div>
 
@@ -119,15 +114,16 @@ export default function NewsListPage() {
                       key={item?.id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
                       transition={{ delay: index * 0.05 }}
                       className="hover:bg-gray-50/50 transition-colors group"
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-14 rounded-xl overflow-hidden shadow-sm bg-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform cursor-pointer border border-gray-100">
-                            {item?.image ? (
+                            {item?.image_url ? (
                               <img 
-                                src={getImageUrl(item.image) || '/placeholder-news.png'} 
+                                src={item.image_url} 
                                 alt={item?.title || 'Article'}
                                 className="w-full h-full object-cover"
                               />
@@ -157,10 +153,14 @@ export default function NewsListPage() {
                             ✏️
                           </Link>
                           <button 
-                            className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100"
+                            className="p-3 bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all font-bold border border-gray-100 disabled:opacity-50"
                             title="Supprimer"
+                            disabled={deletingId === item.id}
+                            onClick={() => handleDelete(item.id, item.title)}
                           >
-                            🗑️
+                            {deletingId === item.id ? (
+                                <span className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin inline-block" />
+                              ) : '🗑️'}
                           </button>
                         </div>
                       </td>

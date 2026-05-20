@@ -6,17 +6,19 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '8000',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.contraste.tn',
+        pathname: '/media/**',
+      },
+      // Keep legacy just in case or for migration
+      {
+        protocol: 'http',
+        hostname: 'localhost',
         port: '8055',
-        pathname: '/assets/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.contraste.tn',
-        pathname: '/assets/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.contraste.tn',
         pathname: '/assets/**',
       },
       {

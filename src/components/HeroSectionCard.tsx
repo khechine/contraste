@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HeroSection } from '@/lib/types';
 import { Locale, getLocalizedField } from '@/lib/i18n';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 import dynamic from 'next/dynamic';
 
 interface HeroSectionCardProps {

@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { Author, Book } from '@/lib/types';
 import { Locale, getLocalizedField, getBooksRoute } from '@/lib/i18n';
 import { BookCard } from '@/components/Cards';
-import { getImageUrl } from '@/lib/directus';
+import { getImageUrl } from '@/lib/django';
 import Link from 'next/link';
 
 interface AuthorDetailContentProps {

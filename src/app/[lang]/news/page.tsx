@@ -1,4 +1,4 @@
-import { getNews } from '@/lib/directus';
+import { getNews } from '@/lib/django';
 import { Locale } from '@/lib/i18n';
 import AnimatedNews from '@/components/AnimatedNews';
 

@@ -52,3 +52,18 @@ next-build.tar.gz
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDEs
+.idea/
+.vscode/
+
+# python / backend
+backend/.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+/staticfiles/
+/media/
+
