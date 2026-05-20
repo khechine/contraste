@@ -7,7 +7,7 @@
 set -e
 
 DOMAIN="www.contraste.tn"
-DIRECTUS_DOMAIN="directus.contraste.tn"
+API_DOMAIN="api.contraste.tn"
 APP_DIR="/home/ubuntu/contraste"
 REPO_URL="https://github.com/khechine/contraste.git"
 
@@ -82,7 +82,7 @@ echo "🌐 Configuration Nginx pour le challenge SSL..."
 sudo tee /etc/nginx/sites-available/contraste > /dev/null <<'NGINX_HTTP'
 server {
     listen 80;
-    server_name contraste.tn www.contraste.tn directus.contraste.tn;
+    server_name contraste.tn www.contraste.tn api.contraste.tn;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -96,7 +96,7 @@ server {
 NGINX_HTTP
 
 sudo ln -sf /etc/nginx/sites-available/contraste /etc/nginx/sites-enabled/contraste
-sudo rm -f /etc/nginx/sites-enabled/default
+sudo rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
 sudo nginx -t && sudo systemctl reload nginx
 echo "✅ Nginx configuré (HTTP provisoire)"
 
@@ -118,16 +118,16 @@ else
     echo "✅ Certificat www.contraste.tn déjà présent"
 fi
 
-# Certificat pour directus.contraste.tn
-if [ ! -d "/etc/letsencrypt/live/directus.contraste.tn" ]; then
+# Certificat pour api.contraste.tn
+if [ ! -d "/etc/letsencrypt/live/api.contraste.tn" ]; then
     sudo certbot certonly --nginx \
-        -d directus.contraste.tn \
+        -d api.contraste.tn \
         --non-interactive \
         --agree-tos \
         --email admin@contraste.tn
-    echo "✅ Certificat directus.contraste.tn obtenu"
+    echo "✅ Certificat api.contraste.tn obtenu"
 else
-    echo "✅ Certificat directus.contraste.tn déjà présent"
+    echo "✅ Certificat api.contraste.tn déjà présent"
 fi
 
 # --- Copier la config Nginx finale ---

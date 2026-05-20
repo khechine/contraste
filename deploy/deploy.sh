@@ -33,9 +33,7 @@ check_var() {
 }
 
 check_var "DB_PASSWORD"
-check_var "DIRECTUS_SECRET"
-check_var "DIRECTUS_KEY"
-check_var "ADMIN_PASSWORD"
+check_var "DJANGO_SECRET_KEY"
 
 echo "✅ Variables d'environnement OK"
 
@@ -46,10 +44,10 @@ cd "$APP_DIR"
 git pull origin main
 echo "✅ Code à jour"
 
-# --- Arrêter l'app Next.js (pas Directus/DB pour éviter la perte de données) ---
+# --- Arrêter les apps (Next.js & Django) ---
 echo ""
-echo "⏹️  Arrêt du service app..."
-sudo docker compose stop app 2>/dev/null || true
+echo "⏹️  Arrêt des services..."
+sudo docker compose stop app backend 2>/dev/null || true
 
 # --- Build et démarrage de tous les services ---
 echo ""
@@ -57,20 +55,20 @@ echo "🔨 Build et démarrage des containers..."
 sudo docker compose --env-file "$ENV_FILE" up -d --build
 
 echo ""
-echo "⏳ Attente que Directus soit prêt..."
+echo "⏳ Attente que le backend Django soit prêt..."
 MAX_WAIT=120
 WAITED=0
-until curl -sf http://localhost:8055/server/health > /dev/null 2>&1; do
+until curl -sf http://localhost:8000/api/v1/books/?limit=1 > /dev/null 2>&1; do
     if [ $WAITED -ge $MAX_WAIT ]; then
-        echo "❌ Directus ne répond pas après ${MAX_WAIT}s"
-        sudo docker compose logs directus --tail=50
+        echo "❌ Django ne répond pas après ${MAX_WAIT}s"
+        sudo docker compose logs backend --tail=50
         exit 1
     fi
     echo "   ... attente (${WAITED}s)"
     sleep 5
     WAITED=$((WAITED + 5))
 done
-echo "✅ Directus est prêt !"
+echo "✅ Backend Django est prêt !"
 
 # --- Nettoyage des images Docker orphelines ---
 echo ""
@@ -85,8 +83,9 @@ echo "================================================"
 echo ""
 sudo docker compose ps
 echo ""
-echo "🌐 Site : https://www.contraste.tn"
-echo "🔧 CMS  : https://directus.contraste.tn/admin"
+echo "🌐 Site      : https://www.contraste.tn"
+echo "🔧 Django API : https://api.contraste.tn/django-admin/"
 echo ""
-echo "👉 Si c'est le premier déploiement :"
-echo "   bash deploy/setup-directus-schema.sh"
+echo "👉 Si c'est le premier déploiement ou pour migrer les données :"
+echo "   sudo docker compose exec backend python migrate_from_directus.py"
+echo ""
