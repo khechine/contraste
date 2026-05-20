@@ -164,6 +164,8 @@ HERO_TYPE_CHOICES = [
     ('secondary', 'Secondaire'),
     ('author', 'Auteur du mois'),
     ('promo', 'Promotion'),
+    ('latest', 'Dernières parutions'),
+    ('news', 'Actualités'),
 ]
 
 class HeroSection(models.Model):
