@@ -105,11 +105,15 @@ function RootLayoutNav() {
   );
 }
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RootLayoutNav />
+        <SafeAreaProvider>
+          <RootLayoutNav />
+        </SafeAreaProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

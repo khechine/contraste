@@ -9,11 +9,14 @@ import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/src/context/AuthContext';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { logout } = useAuth();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -25,8 +28,8 @@ export default function TabLayout() {
           backgroundColor: colors.surface,
           borderTopWidth: 0,
           elevation: 0,
-          height: Platform.OS === 'ios' ? 85 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom || 8,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
