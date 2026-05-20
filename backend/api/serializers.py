@@ -23,6 +23,42 @@ def absolute_url(request, path):
     return f'{base}{path}'
 
 
+class HybridImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if not data:
+            return None
+        if isinstance(data, str):
+            if data.startswith(('http://', 'https://')):
+                parts = data.split('/media/')
+                if len(parts) > 1:
+                    return parts[1]
+            if data.startswith('/media/'):
+                return data[len('/media/'):]
+            base_url = getattr(settings, 'MEDIA_URL', '/media/')
+            if data.startswith(base_url):
+                return data[len(base_url):]
+            return data
+        return super().to_internal_value(data)
+
+
+class HybridFileField(serializers.FileField):
+    def to_internal_value(self, data):
+        if not data:
+            return None
+        if isinstance(data, str):
+            if data.startswith(('http://', 'https://')):
+                parts = data.split('/media/')
+                if len(parts) > 1:
+                    return parts[1]
+            if data.startswith('/media/'):
+                return data[len('/media/'):]
+            base_url = getattr(settings, 'MEDIA_URL', '/media/')
+            if data.startswith(base_url):
+                return data[len(base_url):]
+            return data
+        return super().to_internal_value(data)
+
+
 # ─────────────────────────────────────────────────────────────────
 # Author
 # ─────────────────────────────────────────────────────────────────
@@ -40,7 +76,7 @@ class AuthorListSerializer(serializers.ModelSerializer):
 
 class AuthorDetailSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
-    photo = serializers.ImageField(required=False, allow_null=True)
+    photo = HybridImageField(required=False, allow_null=True)
 
     class Meta:
         model = Author
@@ -75,7 +111,7 @@ class BookListSerializer(serializers.ModelSerializer):
 
 class BookDetailSerializer(serializers.ModelSerializer):
     cover_url = serializers.SerializerMethodField()
-    cover = serializers.ImageField(required=False, allow_null=True)
+    cover = HybridImageField(required=False, allow_null=True)
     author_detail = AuthorListSerializer(source='author', read_only=True)
 
     class Meta:
@@ -107,7 +143,7 @@ class NewsListSerializer(serializers.ModelSerializer):
 
 class NewsDetailSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-    image = serializers.ImageField(required=False, allow_null=True)
+    image = HybridImageField(required=False, allow_null=True)
 
     class Meta:
         model = News
@@ -122,7 +158,7 @@ class NewsDetailSerializer(serializers.ModelSerializer):
 # ─────────────────────────────────────────────────────────────────
 class HeroSectionSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-    image = serializers.ImageField(required=False, allow_null=True)
+    image = HybridImageField(required=False, allow_null=True)
     author_of_month_detail = AuthorListSerializer(source='author_of_month', read_only=True)
 
     class Meta:
@@ -138,8 +174,9 @@ class HeroSectionSerializer(serializers.ModelSerializer):
 # ─────────────────────────────────────────────────────────────────
 class PressSerializer(serializers.ModelSerializer):
     logo_url = serializers.SerializerMethodField()
-    logo = serializers.ImageField(required=False, allow_null=True)
+    logo = HybridImageField(required=False, allow_null=True)
     file_attachment_url = serializers.SerializerMethodField()
+    file_attachment = HybridFileField(required=False, allow_null=True)
 
     class Meta:
         model = Press
@@ -165,6 +202,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        username = attrs.get('username')
+        if username and '@' in username:
+            from django.contrib.auth.models import User
+            try:
+                user = User.objects.get(email__iexact=username)
+                attrs['username'] = user.username
+            except User.DoesNotExist:
+                pass
+
         data = super().validate(attrs)
         data['user'] = {
             'id': self.user.id,
