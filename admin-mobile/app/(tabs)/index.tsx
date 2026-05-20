@@ -1,34 +1,24 @@
 import React from 'react';
-import { FlatList, StyleSheet, View, RefreshControl, Platform } from 'react-native';
+import { FlatList, StyleSheet, View, RefreshControl } from 'react-native';
 import { Text, Card, FAB, ActivityIndicator, IconButton, Searchbar, Chip } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
-import { directus } from '../../src/lib/directus';
-import { readItems } from '@directus/sdk';
+import { fetchList } from '../../src/lib/api';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function BooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
-  const { getAssetUrl } = useAuth();
+  const { getImageUrl } = useAuth();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
 
   const { data: books, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['books'],
-    queryFn: async () => {
-      const data = await directus.request(readItems('books', {
-        fields: ['id', 'title', 'cover_image', 'author_name', 'status', 'title_color', 'author_id.name'],
-        sort: ['-id'],
-      }));
-      const unique = data.filter((item: any, index: number, self: any[]) => 
-        index === self.findIndex((t: any) => t.id === item.id)
-      );
-      return unique;
-    },
+    queryFn: () => fetchList('books', { ordering: '-id' }),
     staleTime: 0,
   });
 
@@ -38,8 +28,8 @@ export default function BooksScreen() {
 
   const renderItem = ({ item }: { item: any }) => (
     <Card style={styles.card} mode="elevated" onPress={() => router.push({ pathname: '/edit-book', params: { id: item.id } })}>
-      {item.cover_image ? (
-        <Card.Cover source={{ uri: getAssetUrl(item.cover_image, { width: 300, height: 200, fit: 'cover' }) || '' }} style={styles.cover} />
+      {item.cover_url ? (
+        <Card.Cover source={{ uri: getImageUrl(item.cover_url) || '' }} style={styles.cover} />
       ) : (
         <View style={[styles.cover, styles.noCover]}>
           <IconButton icon="book-cover-variant" size={40} iconColor="#ccc" />
@@ -47,8 +37,8 @@ export default function BooksScreen() {
       )}
       <Card.Title
         title={item.title}
-        titleStyle={{ fontWeight: '600', fontSize: 17, color: item.title_color || undefined }}
-        subtitle={item.author_id?.name || item.author_name || 'Auteur inconnu'}
+        titleStyle={{ fontWeight: '600', fontSize: 17 }}
+        subtitle={item.author_name_display || 'Auteur inconnu'}
         subtitleStyle={{ color: '#666', fontSize: 14 }}
         right={(props) => (
           <IconButton {...props} icon="chevron-right" size={24} />
@@ -56,20 +46,27 @@ export default function BooksScreen() {
         rightStyle={{ marginRight: 8 }}
       />
       <Card.Content style={{ paddingTop: 0, paddingBottom: 12 }}>
-        <Chip 
-          compact 
-          style={{ 
-            alignSelf: 'flex-start',
-            backgroundColor: item.status === 'published' ? '#e8f5e9' : '#fff3e0',
-          }}
-          textStyle={{ 
-            color: item.status === 'published' ? '#2e7d32' : '#ef6c00',
-            fontSize: 12,
-            fontWeight: '600',
-          }}
-        >
-          {item.status === 'published' ? 'Publié' : 'Brouillon'}
-        </Chip>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {item.is_featured && (
+            <Chip 
+              compact 
+              icon="star"
+              style={{ alignSelf: 'flex-start', backgroundColor: '#fff8e1' }}
+              textStyle={{ color: '#ffa000', fontSize: 12, fontWeight: '600' }}
+            >
+              Vedette
+            </Chip>
+          )}
+          {item.category ? (
+            <Chip 
+              compact 
+              style={{ alignSelf: 'flex-start', backgroundColor: '#e3f2fd' }}
+              textStyle={{ color: '#1565c0', fontSize: 12, fontWeight: '600' }}
+            >
+              {item.category}
+            </Chip>
+          ) : null}
+        </View>
       </Card.Content>
     </Card>
   );

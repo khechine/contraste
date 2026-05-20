@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, ActivityIndicator, SegmentedButtons } from 'react-native-paper';
+import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../src/context/AuthContext';
-import { directus, DIRECTUS_URL } from '../src/lib/directus';
-import { updateItem, createItem, readItem } from '@directus/sdk';
+import { fetchDetail, createResource, updateResource } from '../src/lib/api';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
 import { useColorScheme } from '../hooks/use-color-scheme';
 import { useImageUpload } from '../src/hooks/use-image-upload';
@@ -14,21 +13,24 @@ import ImageSelector from '../src/components/ImageSelector';
 export default function EditNewsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
-  const { getAssetUrl } = useAuth();
+  const { getImageUrl } = useAuth();
   const queryClient = useQueryClient();
   const isEditing = !!id;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
 
-  const { pickImage, uploadToDirectus, uploading: isImageUploading } = useImageUpload();
+  const { pickImage, uploading: isImageUploading } = useImageUpload();
 
   const [form, setForm] = useState({
     title: '',
-    content: '',
-    status: 'draft',
+    title_en: '',
+    title_ar: '',
+    content_fr: '',
+    content_en: '',
+    content_ar: '',
     date: new Date().toISOString().split('T')[0],
-    image: null as string | null,
+    author: '',
   });
   const [image, setImage] = useState<string | null>(null);
 
@@ -36,16 +38,19 @@ export default function EditNewsScreen() {
     queryKey: ['news-item', id],
     queryFn: async () => {
       if (!id) return null;
-      const data: any = await directus.request(readItem('news', id));
+      const data: any = await fetchDetail('news', id);
       setForm({
         title: data.title || '',
-        content: data.content || '',
-        status: data.status || 'draft',
+        title_en: data.title_en || '',
+        title_ar: data.title_ar || '',
+        content_fr: data.content_fr || '',
+        content_en: data.content_en || '',
+        content_ar: data.content_ar || '',
         date: data.date ? data.date.split('T')[0] : new Date().toISOString().split('T')[0],
-        image: data.image || null,
+        author: data.author || '',
       });
-      if (data.image) {
-        setImage(getAssetUrl(data.image));
+      if (data.image_url) {
+        setImage(getImageUrl(data.image_url));
       }
       return data;
     },
@@ -60,9 +65,9 @@ export default function EditNewsScreen() {
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       if (isEditing) {
-        return await directus.request(updateItem('news', id!, data));
+        return await updateResource('news', id!, data);
       } else {
-        return await directus.request(createItem('news', data));
+        return await createResource('news', data);
       }
     },
     onSuccess: () => {
@@ -71,23 +76,38 @@ export default function EditNewsScreen() {
     },
     onError: (error: any) => {
       console.error('Save error:', error);
-      const msg = error.errors?.[0]?.message || error.message || 'Erreur inconnue';
-      Alert.alert('Erreur', `Échec de sauvegarde : ${msg}`);
+      Alert.alert('Erreur', `Échec de sauvegarde : ${error.message || 'Erreur inconnue'}`);
     },
   });
 
   const handleSave = async () => {
     try {
-      let imageId = form.image;
+      const hasNewImage = image && !image.startsWith('http');
 
-      if (image && !image.startsWith('http')) {
-        imageId = await uploadToDirectus(image);
+      if (hasNewImage) {
+        const formData = new FormData();
+        formData.append('title', form.title);
+        formData.append('title_en', form.title_en);
+        formData.append('title_ar', form.title_ar);
+        formData.append('content_fr', form.content_fr);
+        formData.append('content_en', form.content_en);
+        formData.append('content_ar', form.content_ar);
+        formData.append('date', form.date);
+        formData.append('author', form.author);
+
+        const filename = image!.split('/').pop() || 'news.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : 'image/jpeg';
+        formData.append('image', {
+          uri: image,
+          name: filename,
+          type,
+        } as any);
+
+        await mutation.mutateAsync(formData);
+      } else {
+        await mutation.mutateAsync(form);
       }
-
-      await mutation.mutateAsync({
-        ...form,
-        image: imageId,
-      });
     } catch (e) {
       console.error(e);
     }
@@ -120,10 +140,26 @@ export default function EditNewsScreen() {
 
         <View style={[styles.formContainer, { backgroundColor: colors.surface }]}>
           <TextInput
-            label="Titre de l'actualité"
+            label="Titre (FR)"
             value={form.title}
             onChangeText={(v) => setForm({ ...form, title: v })}
             style={styles.input}
+            mode="outlined"
+          />
+
+          <TextInput
+            label="Titre (EN)"
+            value={form.title_en}
+            onChangeText={(v) => setForm({ ...form, title_en: v })}
+            style={styles.input}
+            mode="outlined"
+          />
+
+          <TextInput
+            label="Titre (AR)"
+            value={form.title_ar}
+            onChangeText={(v) => setForm({ ...form, title_ar: v })}
+            style={[styles.input, { textAlign: 'right' }]}
             mode="outlined"
           />
 
@@ -135,24 +171,42 @@ export default function EditNewsScreen() {
             mode="outlined"
           />
 
-          <Text variant="labelLarge" style={[styles.label, { color: colors.textSecondary }]}>Statut</Text>
-          <SegmentedButtons
-            value={form.status}
-            onValueChange={(v) => setForm({ ...form, status: v })}
-            buttons={[
-              { value: 'draft', label: 'Brouillon' },
-              { value: 'published', label: 'En ligne' },
-            ]}
-            style={styles.segmented}
+          <TextInput
+            label="Auteur (texte libre)"
+            value={form.author}
+            onChangeText={(v) => setForm({ ...form, author: v })}
+            style={styles.input}
+            mode="outlined"
+            placeholder="Ex: Contraste Éditions"
           />
 
           <TextInput
-            label="Contenu"
-            value={form.content}
-            onChangeText={(v) => setForm({ ...form, content: v })}
+            label="Contenu (FR)"
+            value={form.content_fr}
+            onChangeText={(v) => setForm({ ...form, content_fr: v })}
             multiline
             numberOfLines={10}
             style={styles.input}
+            mode="outlined"
+          />
+
+          <TextInput
+            label="Contenu (EN)"
+            value={form.content_en}
+            onChangeText={(v) => setForm({ ...form, content_en: v })}
+            multiline
+            numberOfLines={6}
+            style={styles.input}
+            mode="outlined"
+          />
+
+          <TextInput
+            label="Contenu (AR)"
+            value={form.content_ar}
+            onChangeText={(v) => setForm({ ...form, content_ar: v })}
+            multiline
+            numberOfLines={6}
+            style={[styles.input, { textAlign: 'right' }]}
             mode="outlined"
           />
 
@@ -203,13 +257,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: Spacing.md,
-  },
-  label: {
-    marginBottom: Spacing.sm,
-    fontWeight: "600",
-  },
-  segmented: {
-    marginBottom: Spacing.xl,
   },
   saveButton: {
     marginTop: Spacing.xl,

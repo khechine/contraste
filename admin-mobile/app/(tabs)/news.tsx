@@ -1,18 +1,17 @@
 import React from 'react';
-import { FlatList, StyleSheet, View, RefreshControl, Platform } from 'react-native';
+import { FlatList, StyleSheet, View, RefreshControl } from 'react-native';
 import { Text, Card, FAB, ActivityIndicator, Searchbar, Chip, IconButton, Avatar } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
-import { directus, DIRECTUS_URL } from '../../src/lib/directus';
-import { readItems } from '@directus/sdk';
+import { fetchList } from '../../src/lib/api';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function NewsScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
-  const { getAssetUrl } = useAuth();
+  const { getImageUrl } = useAuth();
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -20,16 +19,7 @@ export default function NewsScreen() {
 
   const { data: newsItems, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['news', 'list'],
-    queryFn: async () => {
-      const data = await directus.request(readItems('news', {
-        fields: ['id', 'title', 'date', 'status', 'image'],
-        sort: ['-date'],
-      }));
-      const unique = data.filter((item: any, index: number, self: any[]) => 
-        index === self.findIndex((t: any) => t.id === item.id)
-      );
-      return unique;
-    },
+    queryFn: () => fetchList('news', { ordering: '-date' }),
     staleTime: 0,
   });
 
@@ -49,10 +39,10 @@ export default function NewsScreen() {
       onPress={() => router.push({ pathname: '/edit-news', params: { id: item.id } })}
     >
       <Card.Content style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 }}>
-        {item.image ? (
+        {item.image_url ? (
           <Avatar.Image 
             size={64} 
-            source={{ uri: getAssetUrl(item.image, { width: 128, height: 128, fit: 'cover' }) || '' }} 
+            source={{ uri: getImageUrl(item.image_url) || '' }} 
             style={{ borderRadius: 12 }}
           />
         ) : (
@@ -65,21 +55,6 @@ export default function NewsScreen() {
           <Text variant="bodySmall" style={[styles.date, { color: colors.textSecondary }]}>
             {formatDate(item.date)}
           </Text>
-          <Chip 
-            compact 
-            style={{ 
-              alignSelf: 'flex-start',
-              marginTop: 8,
-              backgroundColor: item.status === 'published' ? '#e8f5e9' : '#fff3e0',
-            }}
-            textStyle={{ 
-              color: item.status === 'published' ? '#2e7d32' : '#ef6c00',
-              fontSize: 11,
-              fontWeight: '600',
-            }}
-          >
-            {item.status === 'published' ? 'En ligne' : 'Brouillon'}
-          </Chip>
         </View>
         <IconButton 
           icon="pencil" 

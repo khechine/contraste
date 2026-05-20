@@ -1,118 +1,87 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Platform } from 'react-native';
-import { directus } from '../lib/directus';
-import { readMe } from '@directus/sdk';
-
-interface AssetOptions {
-  width?: number;
-  height?: number;
-  fit?: 'cover' | 'contain' | 'inside' | 'outside';
-  quality?: number;
-}
+import { loginApi, logoutApi, getCurrentUser, clearTokens, getAccessToken, API_URL } from '../lib/api';
 
 interface AuthContextType {
   user: any | null;
-  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
-  getAssetUrl: (id: string | null, options?: AssetOptions) => string | null;
+  getImageUrl: (url: string | null) => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const fetchToken = async () => {
-    try {
-      const currentToken = await (directus as any).getToken();
-      setToken(currentToken);
-      return currentToken;
-    } catch (e) {
-      setToken(null);
-      return null;
-    }
-  };
 
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const me = await directus.request(readMe());
-        setUser(me);
-        await fetchToken();
+        const token = await getAccessToken();
+        if (token) {
+          const me = await getCurrentUser();
+          setUser(me);
+        }
       } catch (error) {
         console.log('No valid session found or session expired');
+        await clearTokens();
         setUser(null);
-        setToken(null);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     restoreSession();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       const cleanEmail = email.trim().toLowerCase();
-      const cleanPassword = password; // Ne pas trimmer le mot de passe
-      
-      await directus.logout().catch(() => {});
-      await directus.login({ email: cleanEmail, password: cleanPassword }, { mode: 'cookie' });
-      
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const me = await directus.request(readMe());
-      setUser(me);
-      await fetchToken();
+      const userData = await loginApi(cleanEmail, password);
+      setUser(userData);
     } catch (e: any) {
-      console.error('Login error detail:', JSON.stringify(e, null, 2));
       let errorMessage = 'Erreur de connexion';
-      
-      if (e.errors?.[0]?.message) {
-        errorMessage = e.errors[0].message;
-      } else if (e.message) {
-        errorMessage = e.message;
+      try {
+        const parsed = JSON.parse(e.message);
+        errorMessage = parsed.detail || parsed.non_field_errors?.[0] || e.message;
+      } catch {
+        errorMessage = e.message || errorMessage;
       }
 
-      if (errorMessage === 'Invalid user credentials') {
+      if (errorMessage.includes('No active account') || errorMessage.includes('credentials')) {
         errorMessage = 'Identifiants invalides';
       }
-      
+
       throw new Error(errorMessage);
     }
   };
 
   const logout = async () => {
     try {
-      await directus.logout();
+      await logoutApi();
     } catch (e) {
       console.error('Logout error:', e);
     } finally {
       setUser(null);
-      setToken(null);
     }
   };
 
-  const getAssetUrl = (id: string | null, options?: AssetOptions) => {
-    if (!id) return null;
-    let url = `${directus.url}/assets/${id}`;
-    const params = new URLSearchParams();
-
-    if (options?.width) params.append('width', options.width.toString());
-    if (options?.height) params.append('height', options.height.toString());
-    if (options?.fit) params.append('fit', options.fit);
-    if (options?.quality) params.append('quality', options.quality.toString());
-    if (token) params.append('access_token', token);
-
-    const qs = params.toString();
-    return qs ? `${url}?${qs}` : url;
+  /**
+   * Returns a usable image URL from a Django API response.
+   * Django serializers return absolute URLs (cover_url, photo_url, image_url),
+   * so usually the URL is already correct.
+   */
+  const getImageUrl = (url: string | null): string | null => {
+    if (!url) return null;
+    // Already absolute
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // Relative path - prefix with API_URL
+    return `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading, getAssetUrl }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, getImageUrl }}>
       {children}
     </AuthContext.Provider>
   );

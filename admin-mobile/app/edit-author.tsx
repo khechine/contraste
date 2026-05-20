@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
+import { TextInput, Button, Text, ActivityIndicator, Switch, List } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../src/context/AuthContext';
-import { directus, DIRECTUS_URL } from '../src/lib/directus';
-import { updateItem, createItem, readItem } from '@directus/sdk';
+import { fetchDetail, createResource, updateResource } from '../src/lib/api';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
 import { useColorScheme } from '../hooks/use-color-scheme';
 import { useImageUpload } from '../src/hooks/use-image-upload';
@@ -14,21 +13,23 @@ import ImageSelector from '../src/components/ImageSelector';
 export default function EditAuthorScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
-  const { getAssetUrl } = useAuth();
+  const { getImageUrl } = useAuth();
   const queryClient = useQueryClient();
   const isEditing = !!id;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
 
-  const { pickImage, uploadToDirectus, uploading: isImageUploading } = useImageUpload();
+  const { pickImage, uploading: isImageUploading } = useImageUpload();
 
   const [form, setForm] = useState({
     name: '',
+    name_en: '',
     bio_fr: '',
     bio_en: '',
     bio_ar: '',
-    image: null as string | null,
+    country: '',
+    is_author_of_month: false,
   });
   const [image, setImage] = useState<string | null>(null);
 
@@ -36,16 +37,18 @@ export default function EditAuthorScreen() {
     queryKey: ['author', id],
     queryFn: async () => {
       if (!id) return null;
-      const data: any = await directus.request(readItem('authors', id));
+      const data: any = await fetchDetail('authors', id);
       setForm({
         name: data.name || '',
+        name_en: data.name_en || '',
         bio_fr: data.bio_fr || '',
         bio_en: data.bio_en || '',
         bio_ar: data.bio_ar || '',
-        image: data.image || null,
+        country: data.country || '',
+        is_author_of_month: data.is_author_of_month || false,
       });
-      if (data.image) {
-        setImage(getAssetUrl(data.image));
+      if (data.photo_url) {
+        setImage(getImageUrl(data.photo_url));
       }
       return data;
     },
@@ -53,16 +56,16 @@ export default function EditAuthorScreen() {
   });
 
   const handlePickImage = async () => {
-    const uri = await pickImage({ aspect: [1, 1], shape: 'circle' as any });
+    const uri = await pickImage({ aspect: [1, 1] });
     if (uri) setImage(uri);
   };
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       if (isEditing) {
-        return await directus.request(updateItem('authors', id!, data));
+        return await updateResource('authors', id!, data);
       } else {
-        return await directus.request(createItem('authors', data));
+        return await createResource('authors', data);
       }
     },
     onSuccess: () => {
@@ -71,23 +74,37 @@ export default function EditAuthorScreen() {
     },
     onError: (error: any) => {
       console.error('Save error:', error);
-      const msg = error.errors?.[0]?.message || error.message || 'Erreur inconnue';
-      Alert.alert('Erreur', `Échec de sauvegarde : ${msg}`);
+      Alert.alert('Erreur', `Échec de sauvegarde : ${error.message || 'Erreur inconnue'}`);
     },
   });
 
   const handleSave = async () => {
     try {
-      let currentImageId = form.image;
+      const hasNewImage = image && !image.startsWith('http');
 
-      if (image && !image.startsWith('http')) {
-        currentImageId = await uploadToDirectus(image);
+      if (hasNewImage) {
+        const formData = new FormData();
+        formData.append('name', form.name);
+        formData.append('name_en', form.name_en);
+        formData.append('bio_fr', form.bio_fr);
+        formData.append('bio_en', form.bio_en);
+        formData.append('bio_ar', form.bio_ar);
+        formData.append('country', form.country);
+        formData.append('is_author_of_month', form.is_author_of_month ? 'true' : 'false');
+
+        const filename = image!.split('/').pop() || 'photo.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : 'image/jpeg';
+        formData.append('photo', {
+          uri: image,
+          name: filename,
+          type,
+        } as any);
+
+        await mutation.mutateAsync(formData);
+      } else {
+        await mutation.mutateAsync(form);
       }
-
-      await mutation.mutateAsync({
-        ...form,
-        image: currentImageId,
-      });
     } catch (e) {
       console.error(e);
     }
@@ -121,11 +138,28 @@ export default function EditAuthorScreen() {
 
         <View style={[styles.formContainer, { backgroundColor: colors.surface }]}>
           <TextInput
-            label="Nom de l'auteur"
+            label="Nom de l'auteur (FR)"
             value={form.name}
             onChangeText={(v) => setForm({ ...form, name: v })}
             style={styles.input}
             mode="outlined"
+          />
+
+          <TextInput
+            label="Nom (EN)"
+            value={form.name_en}
+            onChangeText={(v) => setForm({ ...form, name_en: v })}
+            style={styles.input}
+            mode="outlined"
+          />
+
+          <TextInput
+            label="Pays"
+            value={form.country}
+            onChangeText={(v) => setForm({ ...form, country: v })}
+            style={styles.input}
+            mode="outlined"
+            placeholder="Ex: Tunisie"
           />
 
           <TextInput
@@ -156,6 +190,21 @@ export default function EditAuthorScreen() {
             numberOfLines={4}
             style={[styles.input, { textAlign: "right" }]}
             mode="outlined"
+          />
+
+          <List.Item
+            title="Auteur du mois"
+            titleStyle={{ color: colors.text }}
+            description="Mis en avant sur la page d'accueil"
+            descriptionStyle={{ color: colors.textSecondary }}
+            right={() => (
+              <Switch 
+                value={form.is_author_of_month} 
+                onValueChange={(v) => setForm({ ...form, is_author_of_month: v })}
+                color={colors.tint}
+              />
+            )}
+            style={{ paddingHorizontal: 0 }}
           />
 
           <Button

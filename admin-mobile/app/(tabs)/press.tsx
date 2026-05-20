@@ -3,8 +3,7 @@ import { FlatList, StyleSheet, View, RefreshControl } from 'react-native';
 import { Text, Card, FAB, ActivityIndicator, IconButton, Searchbar, Chip } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { directus } from '../../src/lib/directus';
-import { readItems } from '@directus/sdk';
+import { fetchList } from '../../src/lib/api';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useColorScheme } from '../../hooks/use-color-scheme';
 
@@ -17,13 +16,7 @@ export default function PressScreen() {
 
   const { data: items, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['press'],
-    queryFn: async () => {
-      const data = await directus.request(readItems('press', {
-        fields: ['id', 'title', 'media_name', 'publication_date', 'featured'],
-        sort: ['-publication_date'],
-      }));
-      return data;
-    },
+    queryFn: () => fetchList('press', { ordering: '-publication_date' }),
     staleTime: 0,
   });
 

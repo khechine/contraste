@@ -1,18 +1,17 @@
 import React from 'react';
-import { FlatList, StyleSheet, View, RefreshControl, Platform } from 'react-native';
+import { FlatList, StyleSheet, View, RefreshControl } from 'react-native';
 import { Text, List, FAB, ActivityIndicator, Searchbar, Avatar, IconButton } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
-import { directus, DIRECTUS_URL } from '../../src/lib/directus';
-import { readItems } from '@directus/sdk';
+import { fetchList } from '../../src/lib/api';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function AuthorsScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
-  const { getAssetUrl } = useAuth();
+  const { getImageUrl } = useAuth();
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -20,16 +19,7 @@ export default function AuthorsScreen() {
 
   const { data: authors, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['authors'],
-    queryFn: async () => {
-      const data = await directus.request(readItems('authors', {
-        fields: ['id', 'name', 'image'],
-        sort: ['-id'],
-      }));
-      const unique = data.filter((item: any, index: number, self: any[]) => 
-        index === self.findIndex((t: any) => t.id === item.id)
-      );
-      return unique;
-    },
+    queryFn: () => fetchList('authors', { ordering: '-id' }),
     staleTime: 0,
   });
 
@@ -41,10 +31,12 @@ export default function AuthorsScreen() {
     <List.Item
       title={item.name}
       titleStyle={{ fontWeight: '600', fontSize: 16, color: colors.text }}
+      description={item.country || undefined}
+      descriptionStyle={{ color: colors.textSecondary, fontSize: 13 }}
       left={() => (
         <Avatar.Image 
           size={52} 
-          source={item.image ? { uri: getAssetUrl(item.image, { width: 104, height: 104, fit: 'cover' }) || '' } : require('../../assets/images/favicon.png')} 
+          source={item.photo_url ? { uri: getImageUrl(item.photo_url) || '' } : require('../../assets/images/favicon.png')} 
           style={{ borderRadius: 12, marginLeft: 4 }}
         />
       )}
