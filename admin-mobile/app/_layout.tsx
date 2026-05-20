@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme as NavDarkTheme, DefaultTheme as NavDefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { Colors } from '@/constants/theme';
 
 const queryClient = new QueryClient();
 
@@ -33,19 +34,70 @@ function RootLayoutNav() {
 
   if (isLoading) return null;
 
-  const paperTheme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
+  const isDark = colorScheme === 'dark';
+  const colors = Colors[isDark ? 'dark' : 'light'];
+  
+  const customLightTheme = {
+    ...NavDefaultTheme,
+    colors: {
+      ...NavDefaultTheme.colors,
+      background: Colors.light.background,
+      card: Colors.light.surface,
+      text: Colors.light.text,
+      border: Colors.light.border,
+      primary: Colors.light.tint,
+    },
+  };
+
+  const customDarkTheme = {
+    ...NavDarkTheme,
+    colors: {
+      ...NavDarkTheme.colors,
+      background: Colors.dark.background,
+      card: Colors.dark.surface,
+      text: Colors.dark.text,
+      border: Colors.dark.border,
+      primary: Colors.dark.tint,
+    },
+  };
+
+  const paperTheme = isDark ? MD3DarkTheme : MD3LightTheme;
 
   return (
     <PaperProvider theme={paperTheme}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={isDark ? customDarkTheme : customLightTheme}>
         <Stack>
           <Stack.Screen name="login" options={{ headerShown: false, title: 'Connexion' }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="edit-book" options={{ presentation: 'modal', title: 'Livre', headerStyle: { backgroundColor: '#fff' }, headerTitleStyle: { fontWeight: '700', fontSize: 18 } }} />
-          <Stack.Screen name="edit-author" options={{ presentation: 'modal', title: 'Auteur', headerStyle: { backgroundColor: '#fff' }, headerTitleStyle: { fontWeight: '700', fontSize: 18 } }} />
-          <Stack.Screen name="edit-news" options={{ presentation: 'modal', title: 'Actualité', headerStyle: { backgroundColor: '#fff' }, headerTitleStyle: { fontWeight: '700', fontSize: 18 } }} />
-          <Stack.Screen name="edit-press" options={{ presentation: 'modal', title: 'Presse', headerStyle: { backgroundColor: '#fff' }, headerTitleStyle: { fontWeight: '700', fontSize: 18 } }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="edit-book" options={{ 
+            presentation: 'modal', 
+            title: 'Modifier le livre', 
+            headerStyle: { backgroundColor: colors.surface }, 
+            headerTintColor: colors.text,
+            headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text } 
+          }} />
+          <Stack.Screen name="edit-author" options={{ 
+            presentation: 'modal', 
+            title: 'Modifier l’auteur', 
+            headerStyle: { backgroundColor: colors.surface }, 
+            headerTintColor: colors.text,
+            headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text } 
+          }} />
+          <Stack.Screen name="edit-news" options={{ 
+            presentation: 'modal', 
+            title: 'Modifier l’actualité', 
+            headerStyle: { backgroundColor: colors.surface }, 
+            headerTintColor: colors.text,
+            headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text } 
+          }} />
+          <Stack.Screen name="edit-press" options={{ 
+            presentation: 'modal', 
+            title: 'Modifier l’article de presse', 
+            headerStyle: { backgroundColor: colors.surface }, 
+            headerTintColor: colors.text,
+            headerTitleStyle: { fontWeight: '700', fontSize: 18, color: colors.text } 
+          }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Détails' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
