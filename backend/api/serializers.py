@@ -8,11 +8,15 @@ from .models import Author, Book, News, HeroSection, Press
 
 
 def absolute_url(request, path):
-    """Build absolute URL for media files."""
+    """Build absolute URL for media files using public SITE_URL to avoid leaking internal hostnames."""
     if not path:
         return None
     if str(path).startswith(('http://', 'https://')):
         return str(path)
+    # Use explicit SITE_URL env var (public domain) to prevent backend:8000 leaking
+    site_url = getattr(settings, 'SITE_URL', None)
+    if site_url:
+        return f'{site_url.rstrip("/")}/media/{path}'
     if request:
         return request.build_absolute_uri(f'/media/{path}')
     base = settings.MEDIA_URL

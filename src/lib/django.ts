@@ -49,16 +49,31 @@ export function getImageUrl(
 ): string | null {
   if (!filename) return null;
 
+  const publicUrl = process.env.NEXT_PUBLIC_DJANGO_URL || 'https://directus.contraste.tn';
+  const cleanUrl = (url: string): string => {
+    return url.replace(/^https?:\/\/(backend|localhost|127\.0\.0\.1):8000/, publicUrl);
+  };
+
   // Object with url directly (from serializer)
   if (typeof filename === 'object' && 'url' in filename) {
-    return (filename as any).url;
+    const rawUrl = (filename as any).url;
+    return rawUrl ? cleanUrl(rawUrl) : null;
   }
 
   const fn = String(filename);
-  if (fn.startsWith('http://') || fn.startsWith('https://')) return fn;
-  if (fn.startsWith('/')) return `${DJANGO_URL}${fn}`;
+  if (fn.startsWith('http://') || fn.startsWith('https://')) {
+    return cleanUrl(fn);
+  }
+  
+  if (fn.startsWith('/')) {
+    const isClient = typeof window !== 'undefined';
+    const base = isClient ? publicUrl : DJANGO_URL;
+    return `${base}${fn}`;
+  }
 
-  return `${DJANGO_URL}/media/${fn}`;
+  const isClient = typeof window !== 'undefined';
+  const base = isClient ? publicUrl : DJANGO_URL;
+  return `${base}/media/${fn}`;
 }
 
 // ─── Map raw API book to Book type ───────────────────────────────────────────
