@@ -84,7 +84,7 @@ echo ""
 sudo docker compose ps
 echo ""
 echo "🌐 Site      : https://www.contraste.tn"
-echo "🔧 Django API : https://api.contraste.tn/django-admin/"
+echo "🔧 Django API : https://directus.contraste.tn/django-admin/"
 echo ""
 echo "👉 Si c'est le premier déploiement ou pour migrer les données :"
 echo "   sudo docker compose exec backend python migrate_from_directus.py"

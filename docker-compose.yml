@@ -44,7 +44,7 @@ services:
     environment:
       DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY}"
       DJANGO_DEBUG: "${DJANGO_DEBUG:-False}"
-      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,api.contraste.tn}"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,directus.contraste.tn}"
       DB_NAME: "${DB_NAME:-contraste}"
       DB_USER: "${DB_USER:-contraste}"
       DB_PASSWORD: "${DB_PASSWORD}"
@@ -75,12 +75,12 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_DJANGO_URL: "${NEXT_PUBLIC_DJANGO_URL:-https://api.contraste.tn}"
+        NEXT_PUBLIC_DJANGO_URL: "${NEXT_PUBLIC_DJANGO_URL:-https://directus.contraste.tn}"
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_DJANGO_URL: "${NEXT_PUBLIC_DJANGO_URL:-https://api.contraste.tn}"
+      NEXT_PUBLIC_DJANGO_URL: "${NEXT_PUBLIC_DJANGO_URL:-https://directus.contraste.tn}"
       # Internal server-side URL (Docker network)
       DJANGO_INTERNAL_URL: "http://backend:8000"
     depends_on:

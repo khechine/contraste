@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.contraste.tn',
+        hostname: 'directus.contraste.tn',
         pathname: '/media/**',
       },
       // Keep legacy just in case or for migration
