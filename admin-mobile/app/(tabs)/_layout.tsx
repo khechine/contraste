@@ -28,8 +28,8 @@ export default function TabLayout() {
           backgroundColor: colors.surface,
           borderTopWidth: 0,
           elevation: 0,
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom || 8,
+          height: Platform.OS === 'web' ? 70 : (insets.bottom ? 60 + insets.bottom : 68),
+          paddingBottom: insets.bottom || 12,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
